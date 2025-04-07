@@ -1,0 +1,3 @@
+rootProject.name = 'tweaty'
+include 'common', 'eureka', 'gateway', 'promotion'
+
