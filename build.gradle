@@ -35,9 +35,10 @@ subprojects {
         useJUnitPlatform()
     }
 
-    bootJar { enabled = false }
-    jar { enabled = true }
-
+    if (project.name == 'common') {
+        bootJar { enabled = false }
+        jar { enabled = true }
+    }
 }
 
 ext {
