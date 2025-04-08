@@ -1,0 +1,23 @@
+services:
+  eureka:
+    build:
+      context: ./eureka
+      dockerfile: Dockerfile
+    container_name: tweaty-eureka
+    ports:
+      - "19090:19090"
+
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: tweaty-gateway
+    ports:
+      - "19091:19091"
+    depends_on:
+      - eureka
+
+
+networks:
+  mynetwork:
+    driver: bridge
