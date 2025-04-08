@@ -1,25 +1,10 @@
-#spring:
-#  application:
-#    name: gateway-service
-#  profiles:
-#    active: local
-#
-
 spring:
   application:
-    name: gateway
+    name: gateway-service
+  profiles:
+    active: local
   main:
     web-application-type: reactive
-
-server:
-  port: 19091
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://eureka:19090/eureka/
-    register-with-eureka: true
-    fetch-registry: true
 
 
 

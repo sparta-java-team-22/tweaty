@@ -17,6 +17,20 @@ services:
     depends_on:
       - eureka
 
+  db:
+    container_name: tweaty-db
+    image: postgres
+    volumes:
+      - tweaty-data:/var/lib/postgresql/data
+    networks:
+      - mynetwork
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+
+volumes:
+  tweaty-data:
 
 networks:
   mynetwork:
