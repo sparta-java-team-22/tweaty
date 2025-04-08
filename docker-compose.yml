@@ -1,5 +1,5 @@
 services:
-  eureka:
+  eureka-service:
     build:
       context: ./eureka
       dockerfile: Dockerfile
@@ -7,7 +7,7 @@ services:
     ports:
       - "19090:19090"
 
-  gateway:
+  gateway-service:
     build:
       context: ./gateway
       dockerfile: Dockerfile
@@ -15,7 +15,7 @@ services:
     ports:
       - "19091:19091"
     depends_on:
-      - eureka
+      - eureka-service
 
 
 networks:
