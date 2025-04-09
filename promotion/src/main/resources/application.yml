@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: promotion-service
+  profiles:
+    active: local
