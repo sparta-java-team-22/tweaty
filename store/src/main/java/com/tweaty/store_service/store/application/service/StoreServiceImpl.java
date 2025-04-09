@@ -13,9 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tweaty.store_service.store.domain.entity.Store;
 import com.tweaty.store_service.store.domain.repository.StoreRepository;
+import com.tweaty.store_service.store.global.exception.CustomException;
 import com.tweaty.store_service.store.presentation.dto.request.StoreRequestDto;
 import com.tweaty.store_service.store.presentation.dto.response.StoreResponseDto;
 
+import exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -36,7 +38,7 @@ public class StoreServiceImpl implements StoreService {
 
 	@Override
 	@Transactional
-	public void updateStore(StoreRequestDto req, UUID storeId) throws Exception {
+	public void updateStore(StoreRequestDto req, UUID storeId) {
 		Store store = findStore(storeId);
 
 		store.update(req);
@@ -44,7 +46,7 @@ public class StoreServiceImpl implements StoreService {
 
 	@Override
 	@Transactional
-	public void deleteStore(UUID storeId) throws Exception {
+	public void deleteStore(UUID storeId) {
 		Store store = findStore(storeId);
 
 		store.softDelete();
@@ -52,7 +54,7 @@ public class StoreServiceImpl implements StoreService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public StoreResponseDto getStore(UUID storeId) throws Exception {
+	public StoreResponseDto getStore(UUID storeId) {
 		Store store = findStore(storeId);
 
 		store.softDelete();
@@ -62,7 +64,7 @@ public class StoreServiceImpl implements StoreService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public Page<StoreResponseDto> getStoreList(int page, int size){
+	public Page<StoreResponseDto> getStoreList(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 
 		return storeRepository.findByIsDeletedIsFalse(pageable).map(StoreResponseDto::toDto);
@@ -77,13 +79,12 @@ public class StoreServiceImpl implements StoreService {
 		return storeRepository.searchStoreList(name, isReservation, isWaiting, pageable).map(StoreResponseDto::toDto);
 	}
 
-
-	private Store findStore(UUID storeId) throws Exception {
-		Store store = storeRepository.findById(storeId).orElseThrow(() ->
-			new Exception("식당을 찾을 수 없습니다."));
+	private Store findStore(UUID storeId) {
+		Store store = storeRepository.findById(storeId)
+			.orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND, HttpStatus.NOT_FOUND));
 
 		if (store.getIsDeleted()) {
-			throw new Exception("삭제된 식당입니다.");
+			throw new CustomException(ErrorCode.STORE_ALREADY_DELETED, HttpStatus.BAD_REQUEST);
 		}
 		return store;
 	}
