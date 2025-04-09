@@ -32,7 +32,7 @@ public class Store extends BaseEntity {
 	@Column(name = "store_id")
 	private UUID id;
 	@Column(nullable = false)
-	private Long userId;
+	private UUID userId;
 	@Column(nullable = false)
 	private String name;
 	@Column(nullable = false)

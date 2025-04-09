@@ -29,7 +29,7 @@ public class StoreController {
 	public ResponseEntity<?> createStore(@RequestBody StoreRequestDto req) {
 
 		// TODO: 유저아이디 받아오기
-		Long userId = 1L;
+		UUID userId = UUID.randomUUID();
 
 		storeService.createStore(req, userId);
 
@@ -40,9 +40,9 @@ public class StoreController {
 	public ResponseEntity<?> updateStore(@RequestBody StoreRequestDto req,@PathVariable UUID storeId) throws Exception {
 
 		// TODO: 유저아이디 받아오기
-		Long userId = 1L;
+		UUID userId = UUID.randomUUID();
 
-		storeService.updateStore(req, userId,storeId);
+		storeService.updateStore(req,storeId);
 
 		return ResponseEntity.status(HttpStatus.ACCEPTED).body("식당 수정 성공");
 	}
@@ -51,9 +51,9 @@ public class StoreController {
 	public ResponseEntity<?> deleteStore(@PathVariable UUID storeId) throws Exception {
 
 		// TODO: 유저아이디 받아오기
-		Long userId = 1L;
+		UUID userId = UUID.randomUUID();
 
-		storeService.deleteStore(userId,storeId);
+		storeService.deleteStore(storeId);
 
 		return ResponseEntity.status(HttpStatus.ACCEPTED).body("식당 삭제 성공");
 	}

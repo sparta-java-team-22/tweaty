@@ -1,5 +1,7 @@
 package com.tweaty.store_service.store.presentation.dto.request;
 
+import java.util.UUID;
+
 import com.tweaty.store_service.store.domain.entity.Store;
 import com.tweaty.store_service.store.domain.entity.StoreType;
 
@@ -37,7 +39,7 @@ public class StoreRequestDto {
 	private String imgUrl;
 
 	@Builder
-	public Store toEntity(Long userId) {
+	public Store toEntity(UUID userId) {
 		return Store.builder()
 			.userId(userId)
 			.name(this.name)

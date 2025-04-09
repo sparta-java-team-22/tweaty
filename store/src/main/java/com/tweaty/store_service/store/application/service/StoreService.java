@@ -22,7 +22,7 @@ public class StoreService {
 	// TODO: 전체 메서드 권한체크 필요
 
 	@Transactional
-	public void createStore(StoreRequestDto req, Long userId) {
+	public void createStore(StoreRequestDto req, UUID userId) {
 
 		Store store = req.toEntity(userId);
 
@@ -30,14 +30,14 @@ public class StoreService {
 	}
 
 	@Transactional
-	public void updateStore(StoreRequestDto req, Long userId, UUID storeId) throws Exception {
+	public void updateStore(StoreRequestDto req, UUID storeId) throws Exception {
 		Store store = findStore(storeId);
 
 		store.update(req);
 	}
 
 	@Transactional
-	public void deleteStore(Long userId, UUID storeId) throws Exception {
+	public void deleteStore(UUID storeId) throws Exception {
 		Store store = findStore(storeId);
 
 		store.softDelete();
