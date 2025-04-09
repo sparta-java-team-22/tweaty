@@ -1,2 +1,2 @@
 rootProject.name = 'tweaty'
-include 'common', 'eureka', 'gateway', 'promotion','store'
+include 'common', 'eureka', 'gateway', 'promotion', 'store', 'coupon'
