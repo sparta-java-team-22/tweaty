@@ -5,20 +5,25 @@ import java.util.UUID;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.UuidGenerator;
 
+import com.tweaty.store_service.store.presentation.dto.request.StoreRequestDto;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@RequiredArgsConstructor
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "p_store")
 public class Store {
 	@Id
@@ -52,5 +57,18 @@ public class Store {
 	private String	imgUrl;
 
 
+	public void update(StoreRequestDto req) {
+		this.name = req.getName();
+		this.address = req.getAddress();
+		this.phoneNumber = req.getPhoneNumber();
+		this.description = req.getDescription();
+		this.openTime = req.getOpenTime();
+		this.closedTime = req.getClosedTime();
+		this.status = req.getStatus();
+		this.isReservation = req.isReservation();
+		this.isWaiting = req.isWaiting();
+		this.reservationAmount = req.getReservationAmount();
+		this.imgUrl = req.getImgUrl();
+	}
 
 }

@@ -1,9 +1,12 @@
 spring:
   application:
     name: store-service
+  profiles:
+    active: local
+
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/tweaty_db
+    url: jdbc:postgresql://store-db:5432/tweaty_store
     username: ${DB_STORE_USER}
     password: ${DB_STORE_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -11,11 +14,12 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
         show_sql: true
+
 
 
 server:
@@ -24,7 +28,4 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:19090/eureka/
-
-
-
+      defaultZone: http://eureka-service:19090/eureka/

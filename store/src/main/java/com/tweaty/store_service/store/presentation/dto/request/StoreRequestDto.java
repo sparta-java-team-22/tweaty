@@ -36,6 +36,7 @@ public class StoreRequestDto {
 
 	private String imgUrl;
 
+	@Builder
 	public Store toEntity(Long userId) {
 		return Store.builder()
 			.userId(userId)
