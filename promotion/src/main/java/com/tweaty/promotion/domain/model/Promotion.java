@@ -61,4 +61,8 @@ public class Promotion extends BaseEntity {
 			.eventEndAt(request.eventEndAt())
 			.build();
 	}
+
+	public void updateEventStatusToEnded() {
+		this.eventStatus = EventStatus.ENDED;
+	}
 }
