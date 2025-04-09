@@ -3,8 +3,8 @@ spring:
     name: gateway-service
   main:
     web-application-type: reactive
-#  profiles:
-#    active: local
+  profiles:
+    active: local
 
 
 server:

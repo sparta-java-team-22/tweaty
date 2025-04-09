@@ -1,8 +1,8 @@
 spring:
   application:
     name: eureka-service
-#  profiles:
-#    active: local
+  profiles:
+    active: local
 server:
   port: 19090
 

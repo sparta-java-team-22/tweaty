@@ -7,6 +7,7 @@ import org.hibernate.annotations.UuidGenerator;
 
 import com.tweaty.store_service.store.presentation.dto.request.StoreRequestDto;
 
+import base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -25,7 +26,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "p_store")
-public class Store {
+public class Store extends BaseEntity {
 	@Id
 	@UuidGenerator
 	@Column(name = "store_id")

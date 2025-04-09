@@ -19,6 +19,8 @@ public class StoreService {
 
 	private final StoreRepository storeRepository;
 
+	// TODO: 전체 메서드 권한체크 필요
+
 	@Transactional
 	public void createStore(StoreRequestDto req, Long userId) {
 
@@ -34,12 +36,20 @@ public class StoreService {
 		store.update(req);
 	}
 
+	@Transactional
+	public void deleteStore(Long userId, UUID storeId) throws Exception {
+		Store store = findStore(storeId);
+
+		store.softDelete();
+	}
+
 	public Store findStore(UUID storeId) throws Exception {
 		Store store = storeRepository.findById(storeId).orElseThrow(() ->
-			new Exception("상점을 찾을 수 없습니다."));
+			new Exception("식당을 찾을 수 없습니다."));
 
-		// TODO: 삭제된 업체인지 검증
-
+		if (store.getIsDeleted()) {
+			throw new Exception("삭제된 식당입니다.");
+		}
 		return store;
 	}
 

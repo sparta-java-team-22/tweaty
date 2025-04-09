@@ -1,4 +1,4 @@
-package com.tweaty.store_service.store.application.service;
+package com.tweaty.store_service.store.domain.service;
 
 import org.springframework.stereotype.Component;
 
