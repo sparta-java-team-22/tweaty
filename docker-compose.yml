@@ -1,5 +1,5 @@
 services:
-  eureka:
+  eureka-service:
     build:
       context: ./eureka
       dockerfile: Dockerfile
@@ -7,7 +7,7 @@ services:
     ports:
       - "19090:19090"
 
-  gateway:
+  gateway-service:
     build:
       context: ./gateway
       dockerfile: Dockerfile
@@ -15,9 +15,17 @@ services:
     ports:
       - "19091:19091"
     depends_on:
-      - eureka
+      - eureka-service
 
 
-networks:
-  mynetwork:
-    driver: bridge
+  tweaty-db:
+    image: postgres
+    container_name: tweaty-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=tweaty_db
+    depends_on:
+      - eureka-service

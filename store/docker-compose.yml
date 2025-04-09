@@ -1,0 +1,29 @@
+services:
+  store-service:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: tweaty-store-service
+    ports:
+      - "19094:19094"
+    depends_on:
+      - store-db
+    networks:
+      - my-network
+
+  store-db:
+    image: postgres
+    container_name: tweaty-store-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${DB_STORE_USER}
+      - POSTGRES_PASSWORD=${DB_STORE_PASSWORD}
+      - POSTGRES_DB=tweaty_store
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    external: true
+    name: my-network
