@@ -86,4 +86,21 @@ public class StoreController {
 		return StoreListResponse.from(storePage);
 	}
 
+
+	// TODO: 메뉴관련해서 검색조건 추가 // 현재는 : 식당이름 키워드만 기준
+	@GetMapping("/search")
+	public StoreListResponse searchStoreList(
+		@RequestParam(required = false) String name,
+		@RequestParam(defaultValue = "false") Boolean isReservation,
+		@RequestParam(defaultValue = "false") Boolean isWaiting,
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "10") int size) throws Exception {
+
+		// TODO: 유저아이디 받아오기
+		UUID userId = UUID.randomUUID();
+
+		Page<StoreResponseDto> storePage = storeService.searchStoreList(name, isReservation, isWaiting, page, size);
+		return StoreListResponse.from(storePage);
+	}
+
 }

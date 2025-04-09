@@ -17,5 +17,8 @@ public interface StoreService {
 
 	StoreResponseDto getStore(UUID storeId) throws Exception;
 
-	 Page<StoreResponseDto> getStoreList(int page, int size) throws Exception;
-}
+	 Page<StoreResponseDto> getStoreList(int page, int size);
+
+	 Page<StoreResponseDto> searchStoreList(String name,Boolean isReservation,Boolean isWaiting,int page, int size);
+
+	}
