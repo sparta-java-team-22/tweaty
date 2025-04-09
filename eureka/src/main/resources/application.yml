@@ -3,13 +3,3 @@ spring:
     name: eureka-service
   profiles:
     active: local
-
-server:
-  port: 19090
-
-eureka:
-  client:
-    fetch-registry: false
-    register-with-eureka: false
-    service-url:
-      defaultZone: http://eureka-service:19090/eureka/

@@ -3,12 +3,7 @@ server:
 
 eureka:
   client:
-    register-with-eureka: false
     fetch-registry: false
+    register-with-eureka: false
     service-url:
-      defaultZone: http://localhost:19090/eureka/
-
-  instance:
-    hostname: localhost
-
-
+      defaultZone: http://eureka-service:19090/eureka/

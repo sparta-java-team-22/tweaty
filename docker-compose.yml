@@ -6,6 +6,8 @@ services:
     container_name: tweaty-eureka
     ports:
       - "19090:19090"
+    networks:
+      - mynetwork
 
   gateway-service:
     build:
@@ -16,6 +18,8 @@ services:
       - "19091:19091"
     depends_on:
       - eureka-service
+    networks:
+      - mynetwork
 
   db:
     container_name: tweaty-db
@@ -25,7 +29,7 @@ services:
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB_URL=${DB_URL}
+      - POSTGRES_DB=${DB_NAME}
     depends_on:
       - eureka-service
     networks:
