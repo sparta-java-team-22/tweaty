@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tweaty.store_service.store.application.service.StoreService;
 import com.tweaty.store_service.store.presentation.dto.request.StoreRequestDto;
+import com.tweaty.store_service.store.presentation.dto.response.StoreResponseDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -56,6 +58,16 @@ public class StoreController {
 		storeService.deleteStore(storeId);
 
 		return ResponseEntity.status(HttpStatus.ACCEPTED).body("식당 삭제 성공");
+	}
+
+	@GetMapping("/{storeId}")
+	public StoreResponseDto getStore(@PathVariable UUID storeId) throws Exception {
+
+		// TODO: 유저아이디 받아오기
+		UUID userId = UUID.randomUUID();
+
+
+		return storeService.getStore(storeId);
 	}
 
 }

@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tweaty.store_service.store.domain.entity.Store;
 import com.tweaty.store_service.store.domain.repository.StoreRepository;
 import com.tweaty.store_service.store.presentation.dto.request.StoreRequestDto;
+import com.tweaty.store_service.store.presentation.dto.response.StoreResponseDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,7 +44,20 @@ public class StoreService {
 		store.softDelete();
 	}
 
-	public Store findStore(UUID storeId) throws Exception {
+
+	@Transactional(readOnly = true)
+	public StoreResponseDto getStore(UUID storeId) throws Exception {
+		Store store = findStore(storeId);
+
+		store.softDelete();
+
+		return StoreResponseDto.toDto(store);
+	}
+
+
+
+
+	private Store findStore(UUID storeId) throws Exception {
 		Store store = storeRepository.findById(storeId).orElseThrow(() ->
 			new Exception("식당을 찾을 수 없습니다."));
 
