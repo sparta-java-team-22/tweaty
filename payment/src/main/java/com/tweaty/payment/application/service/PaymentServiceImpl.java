@@ -2,14 +2,19 @@ package com.tweaty.payment.application.service;
 
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tweaty.payment.domain.entity.Payment;
+import com.tweaty.payment.domain.entity.PaymentType;
 import com.tweaty.payment.domain.repository.PaymentRepository;
 import com.tweaty.payment.domain.service.PaymentDomainService;
 import com.tweaty.payment.presentation.dto.request.PaymentRequestDto;
+import com.tweaty.payment.presentation.dto.response.PaymentResponseDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +32,7 @@ public class PaymentServiceImpl implements PaymentService {
 	public UUID createPayment(PaymentRequestDto req, UUID userId, UUID storeId) {
 
 		// 1. 결제 객체 생성(결제요청 상태)
-		Payment payment = Payment.toReadyEntity(req, storeId,userId);
+		Payment payment = Payment.toReadyEntity(req, storeId, userId);
 		saveReadyPayment(payment);
 
 		try {
@@ -50,6 +55,15 @@ public class PaymentServiceImpl implements PaymentService {
 
 		paymentRepository.save(payment);
 		return payment.getId();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Page<PaymentResponseDto> getPayment(UUID userId, int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
+
+		return paymentRepository.findByUserIdAndIsDeletedFalseAndStatus(userId, PaymentType.SUCCESS, pageable)
+			.map(PaymentResponseDto::toDto);
 	}
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
