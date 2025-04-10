@@ -54,6 +54,7 @@ public class Menu extends BaseEntity {
 
 	public void update(MenuRequestDto req) {
 		this.name = req.getName();
+		this.category = req.getCategory();
 		this.price = req.getPrice();
 		this.imgUrl = req.getImgUrl();
 		this.description = req.getDescription();

@@ -2,6 +2,9 @@ package com.tweaty.store_service.menu.domain.service;
 
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tweaty.store_service.menu.domain.entity.Menu;
 import com.tweaty.store_service.menu.domain.repository.MenuRepository;
 import com.tweaty.store_service.menu.presentation.dto.requset.MenuRequestDto;
+import com.tweaty.store_service.menu.presentation.dto.response.MenuResponseDto;
 import com.tweaty.store_service.store.application.service.StoreService;
 import com.tweaty.store_service.store.domain.entity.Store;
 import com.tweaty.store_service.store.global.exception.CustomException;
@@ -51,6 +55,19 @@ public class MenuServiceImpl implements MenuService {
 	}
 
 
+	@Override
+	@Transactional(readOnly = true)
+	public Page<MenuResponseDto> getMenuList(int page, int size,UUID storeId) {
+
+		Pageable pageable = PageRequest.of(page, size);
+
+		storeService.findStore(storeId);
+
+		return menuRepository.findByStoreIdAndIsDeletedIsFalse(storeId,pageable).map(MenuResponseDto::toDto);
+	}
+
+
+
 	private Menu findMenu(UUID menuId) {
 		Menu menu = menuRepository.findById(menuId)
 			.orElseThrow(() -> new CustomException(ErrorCode.MENU_NOT_FOUND, HttpStatus.NOT_FOUND));
@@ -58,6 +75,9 @@ public class MenuServiceImpl implements MenuService {
 		if (menu.getIsDeleted()) {
 			throw new CustomException(ErrorCode.MENU_ALREADY_DELETED, HttpStatus.BAD_REQUEST);
 		}
+
+		storeService.findStore(menu.getStore().getId());
+
 		return menu;
 	}
 
