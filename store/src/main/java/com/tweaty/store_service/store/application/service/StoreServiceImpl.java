@@ -29,11 +29,12 @@ public class StoreServiceImpl implements StoreService {
 	// TODO: 전체 메서드 권한체크 필요
 	@Override
 	@Transactional
-	public void createStore(StoreRequestDto req, UUID userId) {
+	public UUID createStore(StoreRequestDto req, UUID userId) {
 
 		Store store = req.toEntity(userId);
 
 		storeRepository.save(store);
+		return store.getId();
 	}
 
 	@Override
@@ -79,7 +80,7 @@ public class StoreServiceImpl implements StoreService {
 		return storeRepository.searchStoreList(name, isReservation, isWaiting, pageable).map(StoreResponseDto::toDto);
 	}
 
-	private Store findStore(UUID storeId) {
+	public Store findStore(UUID storeId) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND, HttpStatus.NOT_FOUND));
 

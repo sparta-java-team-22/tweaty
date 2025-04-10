@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tweaty.store_service.store.application.dto.StoreIdDto;
 import com.tweaty.store_service.store.application.service.StoreService;
 
 import com.tweaty.store_service.store.global.SuccessResponse;
@@ -24,7 +25,7 @@ import com.tweaty.store_service.store.presentation.dto.response.StoreResponseDto
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/vi/stores")
+@RequestMapping("/api/v1/stores")
 @RequiredArgsConstructor
 public class StoreController {
 
@@ -36,9 +37,8 @@ public class StoreController {
 		// TODO: 유저아이디 받아오기
 		UUID userId = UUID.randomUUID();
 
-		storeService.createStore(req, userId);
-
-		return SuccessResponse.successMessageOnly("식당 생성 성공");
+		StoreIdDto storeIdDto = new StoreIdDto(storeService.createStore(req, userId));
+		return SuccessResponse.successWith(200, "식당 단건조회 성공.",storeIdDto);
 	}
 
 	@PatchMapping("/{storeId}")
