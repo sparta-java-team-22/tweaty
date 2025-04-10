@@ -14,4 +14,5 @@ public class ReservationRequestDto {
 	private int currentCapacity;
 	private int tableTwo;
 	private int tableFour;
+
 }

@@ -48,7 +48,7 @@ public class Reservation extends BaseEntity {
 	@Column(name = "table_four", nullable = false)
 	private int tableFour;
 
-	Reservation(ReservationRequestDto reservationRequestDto) {
+	public Reservation(ReservationRequestDto reservationRequestDto) {
 		this.storeId = reservationRequestDto.getStoreId();
 		this.tableCount = reservationRequestDto.getTableCount();
 		this.reservationTableCount = reservationRequestDto.getReservationTableCount();
