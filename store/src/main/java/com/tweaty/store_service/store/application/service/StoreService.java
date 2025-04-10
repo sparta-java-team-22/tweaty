@@ -21,7 +21,7 @@ public interface StoreService {
 	Page<StoreResponseDto> getStoreList(int page, int size);
 
 	Page<StoreResponseDto> searchStoreList(String name, Boolean isReservation, Boolean isWaiting, int page, int size);
-
+	Page<StoreResponseDto> getStoreListByOwner(int page, int size, UUID userId);
 
 	Store findStore(UUID storeId);
 }

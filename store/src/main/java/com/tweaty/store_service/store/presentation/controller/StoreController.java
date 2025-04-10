@@ -101,4 +101,18 @@ public class StoreController {
 		return SuccessResponse.successWith(200, "식당 검색 성공.", StoreListResponse.from(storePage));
 	}
 
+
+	// TODO: 추후 유저아이디 헤더에 넣기
+	@GetMapping("/owner/{userId}")
+	public ResponseEntity<?> getStoreListByOwner(
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "10") int size,@PathVariable UUID userId) {
+
+
+		Page<StoreResponseDto> storePage = storeService.getStoreListByOwner(page, size,userId);
+
+		return SuccessResponse.successWith(200, "식당 조회 성공.", StoreListResponse.from(storePage));
+	}
+
+
 }
