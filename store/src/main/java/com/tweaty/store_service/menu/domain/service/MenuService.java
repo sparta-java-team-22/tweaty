@@ -6,6 +6,10 @@ import com.tweaty.store_service.menu.presentation.dto.requset.MenuRequestDto;
 
 public interface MenuService {
 
-
 	UUID createMenu(MenuRequestDto req, UUID storeId);
+
+	void updateMenu(MenuRequestDto req, UUID menuId);
+
+	void deleteMenu(UUID menuId);
+
 }

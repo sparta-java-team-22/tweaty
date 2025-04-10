@@ -38,7 +38,7 @@ public class StoreController {
 		UUID userId = UUID.randomUUID();
 
 		StoreIdDto storeIdDto = new StoreIdDto(storeService.createStore(req, userId));
-		return SuccessResponse.successWith(200, "식당 단건조회 성공.",storeIdDto);
+		return SuccessResponse.successWith(200, "식당 생성 성공.",storeIdDto);
 	}
 
 	@PatchMapping("/{storeId}")

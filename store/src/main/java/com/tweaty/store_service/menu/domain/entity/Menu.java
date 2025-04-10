@@ -7,7 +7,9 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.UuidGenerator;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tweaty.store_service.menu.presentation.dto.requset.MenuRequestDto;
 import com.tweaty.store_service.store.domain.entity.Store;
+import com.tweaty.store_service.store.presentation.dto.request.StoreRequestDto;
 
 import base.BaseEntity;
 import jakarta.persistence.Column;
@@ -49,5 +51,12 @@ public class Menu extends BaseEntity {
 	private int price;
 	private String imgUrl;
 	private String description;
+
+	public void update(MenuRequestDto req) {
+		this.name = req.getName();
+		this.price = req.getPrice();
+		this.imgUrl = req.getImgUrl();
+		this.description = req.getDescription();
+	}
 
 }

@@ -58,8 +58,6 @@ public class StoreServiceImpl implements StoreService {
 	public StoreResponseDto getStore(UUID storeId) {
 		Store store = findStore(storeId);
 
-		store.softDelete();
-
 		return StoreResponseDto.toDto(store);
 	}
 

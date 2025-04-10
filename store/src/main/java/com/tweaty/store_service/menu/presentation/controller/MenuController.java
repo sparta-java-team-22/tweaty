@@ -3,6 +3,8 @@ package com.tweaty.store_service.menu.presentation.controller;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +31,21 @@ public class MenuController {
 		MenuIdDto menuIdDto = new MenuIdDto( menuService.createMenu(req,storeId));
 
 		return SuccessResponse.successWith(200,"메뉴 생성 성공",menuIdDto);
+
+	}
+
+	@PatchMapping("/{menuId}")
+	public ResponseEntity<?> updateMenu(@RequestBody MenuRequestDto req,@PathVariable UUID menuId)  {
+
+		menuService.updateMenu(req,menuId);
+		return SuccessResponse.successMessageOnly("메뉴 수정 성공");
+	}
+
+	@DeleteMapping("/{menuId}")
+	public ResponseEntity<?> deleteMenu(@PathVariable UUID menuId)  {
+
+		menuService.deleteMenu(menuId);
+		return SuccessResponse.successMessageOnly("메뉴 삭제 성공");
 
 	}
 }
