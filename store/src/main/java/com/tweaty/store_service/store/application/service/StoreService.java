@@ -4,12 +4,13 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 
+import com.tweaty.store_service.store.domain.entity.Store;
 import com.tweaty.store_service.store.presentation.dto.request.StoreRequestDto;
 import com.tweaty.store_service.store.presentation.dto.response.StoreResponseDto;
 
 public interface StoreService {
 
-	void createStore(StoreRequestDto req, UUID userId);
+	UUID createStore(StoreRequestDto req, UUID userId);
 
 	void updateStore(StoreRequestDto req, UUID storeId);
 
@@ -20,5 +21,7 @@ public interface StoreService {
 	Page<StoreResponseDto> getStoreList(int page, int size);
 
 	Page<StoreResponseDto> searchStoreList(String name, Boolean isReservation, Boolean isWaiting, int page, int size);
+	Page<StoreResponseDto> getStoreListByOwner(int page, int size, UUID userId);
 
+	Store findStore(UUID storeId);
 }

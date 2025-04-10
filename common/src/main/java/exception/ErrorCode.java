@@ -18,8 +18,11 @@ public enum ErrorCode {
 
 	// 식당
 	STORE_NOT_FOUND("ERROR-S001","식당을 찾을 수 없습니다."),
-	STORE_ALREADY_DELETED("ERROR-S002","삭제된 식당입니다.");
+	STORE_ALREADY_DELETED("ERROR-S002","삭제된 식당입니다."),
 
+	// 메뉴
+	MENU_NOT_FOUND("ERROR-M001","메뉴를 찾을 수 없습니다."),
+	MENU_ALREADY_DELETED("ERROR-M002","삭제된 메뉴입니다.");
 
 	private final String code;
 	private final String message;

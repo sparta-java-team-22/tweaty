@@ -17,6 +17,9 @@ public interface StoreRepository extends JpaRepository<Store, UUID> {
 
 	Page<Store> findByIsDeletedIsFalse(Pageable pageable);
 
+	Page<Store> findByUserIdAndIsDeletedIsFalse(UUID userId,Pageable pageable);
+
+
 	@Query("SELECT s FROM Store s " +
 		"WHERE s.isDeleted = false " +
 		"AND LOWER(s.name) LIKE LOWER(CONCAT('%', :name, '%')) " +
