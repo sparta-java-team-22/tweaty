@@ -80,4 +80,8 @@ public class Coupon extends BaseEntity {
 			.isFirstCome(request.isFirstCome())
 			.build();
 	}
+
+	public void updateCouponRemainingStock() {
+		couponRemainingStock.decreaseQuantity();
+	}
 }
