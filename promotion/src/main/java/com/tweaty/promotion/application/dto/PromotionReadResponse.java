@@ -22,8 +22,8 @@ public record PromotionReadResponse(
 			promotion.getEventDescription(),
 			promotion.getEventStatus(),
 			promotion.getCouponId(),
-			promotion.getEventStartAt(),
-			promotion.getEventEndAt()
+			promotion.getEventPeriod().getStartAt(),
+			promotion.getEventPeriod().getEndAt()
 		);
 	}
 }
