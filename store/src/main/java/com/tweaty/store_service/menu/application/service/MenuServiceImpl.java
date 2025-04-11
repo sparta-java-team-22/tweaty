@@ -1,4 +1,4 @@
-package com.tweaty.store_service.menu.domain.service;
+package com.tweaty.store_service.menu.application.service;
 
 import java.util.UUID;
 
@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tweaty.store_service.menu.application.service.MenuService;
 import com.tweaty.store_service.menu.domain.entity.Menu;
 import com.tweaty.store_service.menu.domain.repository.MenuRepository;
 import com.tweaty.store_service.menu.presentation.dto.requset.MenuRequestDto;

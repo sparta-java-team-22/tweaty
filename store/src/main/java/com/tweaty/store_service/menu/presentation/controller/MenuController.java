@@ -15,13 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tweaty.store_service.menu.application.dto.MenuIdDto;
-import com.tweaty.store_service.menu.domain.service.MenuService;
+import com.tweaty.store_service.menu.application.service.MenuService;
 import com.tweaty.store_service.menu.presentation.dto.requset.MenuRequestDto;
 import com.tweaty.store_service.menu.presentation.dto.response.MenuListResponse;
 import com.tweaty.store_service.menu.presentation.dto.response.MenuResponseDto;
 import com.tweaty.store_service.store.global.SuccessResponse;
-import com.tweaty.store_service.store.presentation.dto.response.StoreListResponse;
-import com.tweaty.store_service.store.presentation.dto.response.StoreResponseDto;
 
 import lombok.RequiredArgsConstructor;
 
