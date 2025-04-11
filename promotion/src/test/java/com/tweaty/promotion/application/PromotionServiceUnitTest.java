@@ -17,12 +17,13 @@ import com.tweaty.promotion.application.dto.PromotionReadResponse;
 import com.tweaty.promotion.domain.model.EventStatus;
 import com.tweaty.promotion.domain.model.Promotion;
 import com.tweaty.promotion.domain.repository.PromotionRepository;
+import com.tweaty.promotion.domain.vo.EventPeriod;
 import com.tweaty.promotion.presentation.request.PromotionCreateRequest;
 
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
-class PromotionServiceTest {
+class PromotionServiceUnitTest {
 	@Autowired
 	private PromotionService promotionService;
 	@Autowired
@@ -36,8 +37,11 @@ class PromotionServiceTest {
 			.eventDescription("5월 진행되는 이벤트입니다.")
 			.eventStatus(EventStatus.READY)
 			.couponId(UUID.randomUUID())
-			.eventStartAt(LocalDateTime.of(2025, 5, 1, 12, 0))
-			.eventEndAt(LocalDateTime.of(2025, 5, 8, 23, 59))
+			.eventPeriod(EventPeriod.of(
+					LocalDateTime.of(2025, 5, 1, 12, 0),
+					LocalDateTime.of(2025, 5, 8, 23, 59)
+				)
+			)
 			.build();
 
 		promotionRepository.save(testPromotion);
@@ -81,8 +85,6 @@ class PromotionServiceTest {
 		// when
 		promotionService.updateEventStatusToEnded(testPromotion.getPromotionId());
 		// then
-		//Promotion updated = promotionRepository.findByPromotionId(testPromotion.getPromotionId()).get();
-
 		assertThat(testPromotion.getEventStatus()).isEqualTo(EventStatus.ENDED);
 	}
 }
