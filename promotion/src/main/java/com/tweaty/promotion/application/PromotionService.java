@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.tweaty.promotion.application.dto.PromotionCreateResponse;
 import com.tweaty.promotion.application.dto.PromotionReadResponse;
+import com.tweaty.promotion.application.dto.PromotionTimeAttackCouponResponse;
 import com.tweaty.promotion.presentation.request.PromotionCreateRequest;
 
 public interface PromotionService {
@@ -12,4 +13,6 @@ public interface PromotionService {
 	PromotionReadResponse getEvent(UUID eventId);
 
 	void updateEventStatusToEnded(UUID eventId);
+
+	PromotionTimeAttackCouponResponse issueTimeAttackCoupon(UUID eventId);
 }

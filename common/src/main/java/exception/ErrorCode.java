@@ -12,6 +12,9 @@ public enum ErrorCode {
 	// 이벤트
 	PROMOTION_DUPLICATED("ERROR-P001", "이미 존재하고 있는 이벤트입니다."),
 	PROMOTION_NOT_FOUND("ERROR-P002", "찾을 수 없는 이벤트입니다."),
+	PROMOTION_COUPON_NOT_FOUND("ERROR-P003", "이벤트에 해당하는 쿠폰이 없습니다."),
+	PROMOTION_ISSUE_COUPON_API_FAIL("ERROR-P004", "쿠폰 서비스의 쿠폰 발급 api 호출이 실패되었습니다."),
+	PROMOTION_NOT_ACTIVE("ERROR-P005", "이벤트 기간이 아닙니다."),
 
 	// 식당
 	STORE_NOT_FOUND("ERROR-S001", "식당을 찾을 수 없습니다."),
