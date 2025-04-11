@@ -13,6 +13,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -49,7 +50,7 @@ public class Payment extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	private MethodType method;
 
-	public static Payment toReadyEntity(PaymentRequestDto req,UUID storeId,UUID userId){
+	public static Payment toReadyEntity(PaymentRequestDto req, UUID storeId, UUID userId) {
 		return Payment.builder()
 			.userId(userId)
 			.storeId(storeId)
@@ -61,9 +62,9 @@ public class Payment extends BaseEntity {
 			.build();
 	}
 
-	public void applyDiscount(int discountAmount,int finalAmount) {
+	public void applyDiscount(int discountAmount, int finalAmount) {
 		this.discountAmount = discountAmount;
-		this.finalAmount =finalAmount;
+		this.finalAmount = finalAmount;
 	}
 
 	public void successPayment() {
@@ -72,6 +73,10 @@ public class Payment extends BaseEntity {
 
 	public void failPayment() {
 		this.status = PaymentType.FAIL;
+	}
+
+	public void successRefund() {
+		this.status = PaymentType.REFUNDED;
 	}
 
 

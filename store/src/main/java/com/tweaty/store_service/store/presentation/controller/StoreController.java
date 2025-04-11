@@ -63,15 +63,15 @@ public class StoreController {
 		return SuccessResponse.successMessageOnly("식당 삭제 성공");
 	}
 
-	@GetMapping("/{storeId}")
-	public ResponseEntity<?> getStore(@PathVariable UUID storeId) {
 
-		// TODO: 유저아이디 받아오기
-		UUID userId = UUID.randomUUID();
-		return SuccessResponse.successWith(200, "식당 단건조회 성공.", storeService.getStore(storeId));
+	// TODO: 예약서비스에서 요청으로 사용
+	@GetMapping("/{storeId}")
+	public StoreResponseDto getStore(@PathVariable UUID storeId) {
+
+		return storeService.getStore(storeId);
 	}
 
-	@GetMapping()
+	@GetMapping
 	public ResponseEntity<?> getStoreList(
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size) {
@@ -84,7 +84,7 @@ public class StoreController {
 		return SuccessResponse.successWith(200, "식당 전체조회 성공.", StoreListResponse.from(storePage));
 	}
 
-	// TODO: 메뉴관련해서 검색조건 추가 // 현재는 : 식당이름 키워드만 기준
+	// TODO: 메뉴관련해서 검색조건 추가예정 // 현재는 : 식당이름 키워드만 기준
 	@GetMapping("/search")
 	public ResponseEntity<?> searchStoreList(
 		@RequestParam(required = false) String name,
