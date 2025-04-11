@@ -1,6 +1,5 @@
 package com.tweaty.payment.application.service;
 
-import java.awt.*;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -8,12 +7,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tweaty.payment.domain.entity.DiscountType;
 import com.tweaty.payment.domain.entity.Payment;
 import com.tweaty.payment.domain.entity.PaymentType;
 import com.tweaty.payment.domain.entity.Refund;
+import com.tweaty.payment.domain.entity.RefundType;
 import com.tweaty.payment.domain.repository.PaymentRepository;
 import com.tweaty.payment.domain.repository.RefundRepository;
 import com.tweaty.payment.domain.service.PaymentDomainService;
@@ -21,6 +21,7 @@ import com.tweaty.payment.global.exception.CustomException;
 import com.tweaty.payment.presentation.dto.request.PaymentRequestDto;
 import com.tweaty.payment.presentation.dto.request.RefundRequestDto;
 import com.tweaty.payment.presentation.dto.response.PaymentResponseDto;
+import com.tweaty.payment.presentation.dto.response.RefundResponseDto;
 
 import exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -42,15 +43,18 @@ public class PaymentServiceImpl implements PaymentService {
 
 		// 1. 결제 객체 생성(결제요청 상태)
 		Payment payment = Payment.toReadyEntity(req, storeId, userId);
-		saveReadyPayment(payment);
+		paymentDomainService.saveReadyPayment(payment);
 
 		try {
 			// 2. 쿠폰이 있는 경우에 할인 적용
-			// TODO: coupon-service: 쿠폰아이디가 있으면 요청보내서 할인금액 받아오기
+			// TODO: coupon-service: 쿠폰아이디가 있으면 요청보내서 할인금액 받아오기 (실제금액,퍼센티지로 구분)
 			if (req.getCouponId() != null) {
-				int discountAmount = 1000;
+				// 정액(FIXED), 정률(RATE)
+				DiscountType discounyType = DiscountType.RATE;
+				int discountAmount = 10;
 				// TODO: 할인금액 계산하기 -> PaymentDomainService 에서 구현
-				int finalAmount = paymentDomainService.calculateDiscount(req.getOriginalAmount(), discountAmount);
+				int finalAmount = paymentDomainService.calculateDiscount(req.getOriginalAmount(), discountAmount,
+					discounyType);
 				payment.applyDiscount(discountAmount, finalAmount);
 
 			}
@@ -73,7 +77,7 @@ public class PaymentServiceImpl implements PaymentService {
 	public Page<PaymentResponseDto> getPayment(UUID userId, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 
-		return paymentRepository.findByUserIdAndIsDeletedFalseAndStatus(userId, PaymentType.SUCCESS, pageable)
+		return paymentRepository.findByUserIdAndStatus(userId, PaymentType.SUCCESS, pageable)
 			.map(PaymentResponseDto::toDto);
 	}
 
@@ -83,7 +87,7 @@ public class PaymentServiceImpl implements PaymentService {
 		// 1. 환불 객체 생성(환불요청 상태)
 		Payment payment = findPayment(paymentId);
 		Refund refund = Refund.toReadyEntity(req, userId, payment);
-		saveReadyRefund(refund);
+		paymentDomainService.saveReadyRefund(refund);
 
 		try {
 			// TODO: 2. coupon-service: 쿠폰아이디가 있으면 요청보내서 사용가능하게 만들기
@@ -103,14 +107,13 @@ public class PaymentServiceImpl implements PaymentService {
 		return refund.getId();
 	}
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void saveReadyPayment(Payment payment) {
-		paymentRepository.save(payment);
-	}
+	@Override
+	@Transactional(readOnly = true)
+	public Page<RefundResponseDto> getRefund(UUID userId, int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void saveReadyRefund(Refund refund) {
-		refundRepository.save(refund);
+		return refundRepository.findByUserIdAndStatus(userId, RefundType.SUCCESS, pageable)
+			.map(RefundResponseDto::toDto);
 	}
 
 	private Payment findPayment(UUID paymentId) {

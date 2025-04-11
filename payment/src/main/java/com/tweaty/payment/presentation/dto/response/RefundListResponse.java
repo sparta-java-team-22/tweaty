@@ -11,9 +11,10 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 @Builder
-public class PaymentListResponse {
-	private List<PaymentResponseDto> paymentList;
+public class RefundListResponse {
+	private List<RefundResponseDto> refundList;
 	private Pagination pagination;
+
 	@Getter
 	@AllArgsConstructor
 	@Builder
@@ -24,10 +25,9 @@ public class PaymentListResponse {
 		private Long totalElements;
 	}
 
-
-	public static PaymentListResponse from(Page<PaymentResponseDto> page) {
-		return PaymentListResponse.builder()
-			.paymentList(page.getContent())
+	public static RefundListResponse from(Page<RefundResponseDto> page) {
+		return RefundListResponse.builder()
+			.refundList(page.getContent())
 			.pagination(Pagination.builder()
 				.page(page.getNumber())
 				.size(page.getSize())
@@ -37,3 +37,5 @@ public class PaymentListResponse {
 			.build();
 	}
 }
+
+

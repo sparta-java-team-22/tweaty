@@ -13,6 +13,6 @@ import com.tweaty.payment.domain.entity.PaymentType;
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, UUID> {
 
-	Page<Payment> findByUserIdAndIsDeletedFalseAndStatus(UUID userId, PaymentType status, Pageable pageable);
+	Page<Payment> findByUserIdAndStatus(UUID userId, PaymentType status, Pageable pageable);
 
 }

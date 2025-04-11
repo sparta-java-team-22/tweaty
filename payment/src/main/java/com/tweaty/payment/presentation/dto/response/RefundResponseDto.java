@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.tweaty.payment.domain.entity.MethodType;
+import com.tweaty.payment.domain.entity.Payment;
+import com.tweaty.payment.domain.entity.Refund;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
@@ -17,9 +19,18 @@ public class RefundResponseDto {
 
 	@NotEmpty
 	private UUID id;
-	@NotEmpty
-	private UUID userId;
 	private int amount;
 	private String reason;
 	private LocalDateTime createdAt;
+
+
+	@Builder
+	public static RefundResponseDto toDto(Refund refund) {
+		return RefundResponseDto.builder()
+			.id(refund.getId())
+			.amount(refund.getAmount())
+			.reason(refund.getReason())
+			.createdAt(refund.getCreatedAt())
+			.build();
+	}
 }

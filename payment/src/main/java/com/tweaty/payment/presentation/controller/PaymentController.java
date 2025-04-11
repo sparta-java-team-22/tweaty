@@ -20,6 +20,8 @@ import com.tweaty.payment.presentation.dto.request.PaymentRequestDto;
 import com.tweaty.payment.presentation.dto.request.RefundRequestDto;
 import com.tweaty.payment.presentation.dto.response.PaymentListResponse;
 import com.tweaty.payment.presentation.dto.response.PaymentResponseDto;
+import com.tweaty.payment.presentation.dto.response.RefundListResponse;
+import com.tweaty.payment.presentation.dto.response.RefundResponseDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,7 +43,7 @@ public class PaymentController {
 		return SuccessResponse.successWith(200, "결제 생성 성공", paymentIdDto);
 	}
 
-	@GetMapping("/success")
+	@GetMapping
 	public ResponseEntity<?> getPaymentList(@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size) {
 
@@ -53,7 +55,6 @@ public class PaymentController {
 		return SuccessResponse.successWith(200, "결제 내역조회 성공", PaymentListResponse.from(paymentPage));
 	}
 
-
 	@PostMapping("/{paymentId}/refund")
 	public ResponseEntity<?> createRefund(@RequestBody RefundRequestDto req, @PathVariable UUID paymentId) {
 
@@ -63,6 +64,18 @@ public class PaymentController {
 		RefundIdDto refundIdDto = new RefundIdDto(paymentService.createRefund(req, userId, paymentId));
 
 		return SuccessResponse.successWith(200, "환불 생성 성공", refundIdDto);
+	}
+
+	@GetMapping("/refund")
+	public ResponseEntity<?> getRefundList(@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "10") int size) {
+
+		// TODO: 유저아이디 헤더 추가
+		UUID userId = UUID.fromString("d263308c-5bf0-4362-9c51-a4c42c123456");
+
+		Page<RefundResponseDto> refundPage = paymentService.getRefund(userId, page, size);
+
+		return SuccessResponse.successWith(200, "환불 내역조회 성공", RefundListResponse.from(refundPage));
 	}
 
 }
