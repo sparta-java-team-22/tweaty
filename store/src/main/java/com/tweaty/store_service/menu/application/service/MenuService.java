@@ -1,4 +1,4 @@
-package com.tweaty.store_service.menu.domain.service;
+package com.tweaty.store_service.menu.application.service;
 
 import java.util.UUID;
 
