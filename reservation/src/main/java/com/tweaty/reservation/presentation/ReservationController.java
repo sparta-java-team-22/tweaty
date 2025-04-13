@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,6 +51,12 @@ public class ReservationController {
 		@RequestBody ReservationRequestDto requestDto) {
 		reservationService.updateReservation(reservationId, requestDto);
 		return ResponseEntity.status(HttpStatus.OK).body("예약 일정이 수정되었습니다.");
+	}
+
+	@DeleteMapping("/{reservationId}")
+	public ResponseEntity<?> deleteReservation(@PathVariable Long reservationId) {
+		reservationService.deleteReservation(reservationId);
+		return ResponseEntity.status(HttpStatus.OK).body("예약 일정이 삭제되었습니다.");
 	}
 
 }

@@ -44,4 +44,11 @@ public class ReservationService {
 		reservation.update(requestDto);
 		reservationRepository.save(reservation);
 	}
+
+	public void deleteReservation(Long reservationId) {
+		Reservation reservation = reservationRepository.findByIdAndIsDeletedFalse(reservationId)
+			.orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
+		reservation.softDelete();
+		reservationRepository.save(reservation);
+	}
 }
