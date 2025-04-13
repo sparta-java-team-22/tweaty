@@ -58,4 +58,15 @@ public class Reservation extends BaseEntity {
 		this.tableTwo = reservationRequestDto.getTableTwo();
 		this.tableFour = reservationRequestDto.getTableFour();
 	}
+
+	public void update(ReservationRequestDto requestDto) {
+		this.storeId = requestDto.getStoreId();
+		this.tableCount = requestDto.getTableCount();
+		this.reservationTableCount = requestDto.getReservationTableCount();
+		this.reservationTime = requestDto.getReservationTime();
+		this.reservationDate = requestDto.getReservationDate();
+		this.currentCapacity = requestDto.getCurrentCapacity();
+		this.tableTwo = requestDto.getTableTwo();
+		this.tableFour = requestDto.getTableFour();
+	}
 }
