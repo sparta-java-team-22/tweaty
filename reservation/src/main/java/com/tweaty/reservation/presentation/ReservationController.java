@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,9 +33,15 @@ public class ReservationController {
 
 	@GetMapping
 	public ResponseEntity<?> getReservation() {
-		List<ReservationResponseDto> reservationList = reservationService.getReservation();
+		List<?> reservationList = reservationService.getReservation();
 
 		return ResponseEntity.status(HttpStatus.OK).body(reservationList);
+	}
+
+	@GetMapping("/{reservationId}")
+	public ResponseEntity<?> getReservationById(@PathVariable Long reservationId) {
+		ReservationResponseDto reservation = reservationService.getReservationById(reservationId);
+		return ResponseEntity.status(HttpStatus.OK).body(reservation);
 	}
 
 }

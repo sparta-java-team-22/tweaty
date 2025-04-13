@@ -21,8 +21,17 @@ public class ReservationService {
 		reservationRepository.save(new Reservation(requestDto));
 	}
 
-	public List<ReservationResponseDto> getReservation() {
+	public List<?> getReservation() {
 		List<Reservation> reservationList = reservationRepository.findAll();
-		return ReservationResponseDto.from(reservationList);
+		if (reservationList.isEmpty()) {
+			return List.of("예약 일정이 없습니다.");
+		}
+		return ReservationResponseDto.fromList(reservationList);
+	}
+
+	public ReservationResponseDto getReservationById(Long reservationId) {
+		Reservation reservation = reservationRepository.findByIdAndIsDeletedFalse(reservationId)
+			.orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
+		return ReservationResponseDto.from(reservation);
 	}
 }

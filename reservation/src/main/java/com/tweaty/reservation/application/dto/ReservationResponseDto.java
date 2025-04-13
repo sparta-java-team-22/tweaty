@@ -19,7 +19,7 @@ public class ReservationResponseDto {
 	private int tableTwo;
 	private int tableFour;
 
-	public static List<ReservationResponseDto> from(List<Reservation> reservationList) {
+	public static List<ReservationResponseDto> fromList(List<Reservation> reservationList) {
 		return reservationList.stream().map(reservation -> {
 			ReservationResponseDto reservationResponseDto = new ReservationResponseDto();
 			reservationResponseDto.id = reservation.getId();
@@ -33,5 +33,19 @@ public class ReservationResponseDto {
 			reservationResponseDto.tableFour = reservation.getTableFour();
 			return reservationResponseDto;
 		}).toList();
+	}
+
+	public static ReservationResponseDto from(Reservation reservation) {
+		ReservationResponseDto reservationResponseDto = new ReservationResponseDto();
+		reservationResponseDto.id = reservation.getId();
+		reservationResponseDto.storeId = reservation.getStoreId();
+		reservationResponseDto.tableCount = reservation.getTableCount();
+		reservationResponseDto.reservationTableCount = reservation.getReservationTableCount();
+		reservationResponseDto.reservationTime = reservation.getReservationTime();
+		reservationResponseDto.reservationDate = reservation.getReservationDate();
+		reservationResponseDto.currentCapacity = reservation.getCurrentCapacity();
+		reservationResponseDto.tableTwo = reservation.getTableTwo();
+		reservationResponseDto.tableFour = reservation.getTableFour();
+		return reservationResponseDto;
 	}
 }
