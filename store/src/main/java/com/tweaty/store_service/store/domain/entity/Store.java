@@ -1,18 +1,22 @@
 package com.tweaty.store_service.store.domain.entity;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.UuidGenerator;
 
+import com.tweaty.store_service.menu.domain.entity.Menu;
 import com.tweaty.store_service.store.presentation.dto.request.StoreRequestDto;
 
 import base.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
@@ -57,6 +61,8 @@ public class Store extends BaseEntity {
 
 	private String	imgUrl;
 
+	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL,orphanRemoval = true)
+	private List<Menu> menuList;
 
 	public void update(StoreRequestDto req) {
 		this.name = req.getName();
