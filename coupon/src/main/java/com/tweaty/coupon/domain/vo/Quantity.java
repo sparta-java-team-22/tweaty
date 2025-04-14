@@ -22,4 +22,8 @@ public class Quantity {
 	public static Quantity from(Integer value) {
 		return new Quantity(value);
 	}
+
+	public void decreaseQuantity() {
+		this.value -= 1;
+	}
 }

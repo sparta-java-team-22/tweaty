@@ -1,0 +1,10 @@
+services:
+  coupon-postgres-test:
+    container_name: coupon_postgres_test
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: coupon_test_db
+      POSTGRES_USER: coupon_test_user
+      POSTGRES_PASSWORD: testpass
+    ports:
+      - "55432:5432"

@@ -3,10 +3,12 @@ package com.tweaty.promotion.domain.model;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.tweaty.promotion.domain.vo.EventPeriod;
 import com.tweaty.promotion.presentation.request.PromotionCreateRequest;
 
 import base.BaseEntity;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -45,11 +47,8 @@ public class Promotion extends BaseEntity {
 	@Column(name = "event_status")
 	private EventStatus eventStatus;
 
-	@Column(name = "event_start_at")
-	private LocalDateTime eventStartAt;
-
-	@Column(name = "event_end_at")
-	private LocalDateTime eventEndAt;
+	@Embedded
+	private EventPeriod eventPeriod;
 
 	public static Promotion create(PromotionCreateRequest request) {
 		return Promotion.builder()
@@ -57,12 +56,15 @@ public class Promotion extends BaseEntity {
 			.eventName(request.eventName())
 			.eventDescription(request.eventDescription())
 			.eventStatus(EventStatus.from(request.eventStatus()))
-			.eventStartAt(request.eventStartAt())
-			.eventEndAt(request.eventEndAt())
+			.eventPeriod(EventPeriod.of(request.eventStartAt(), request.eventEndAt()))
 			.build();
 	}
 
 	public void updateEventStatusToEnded() {
 		this.eventStatus = EventStatus.ENDED;
+	}
+
+	public void checkEventPeriod(LocalDateTime now) {
+		eventPeriod.checkEventAvailable(now);
 	}
 }
