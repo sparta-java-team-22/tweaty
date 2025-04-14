@@ -15,7 +15,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tweaty.coupon.application.dto.CouponCreateResponse;
+import com.tweaty.coupon.application.dto.CouponReadResponse;
 import com.tweaty.coupon.domain.model.Coupon;
+import com.tweaty.coupon.domain.model.DiscountType;
 import com.tweaty.coupon.domain.repository.CouponRepository;
 import com.tweaty.coupon.domain.vo.CouponIssuancePeriod;
 import com.tweaty.coupon.domain.vo.DiscountPolicy;
@@ -106,5 +108,20 @@ class CouponServiceTest {
 
 		assertThat(updatedCoupon.getCouponMaxIssuance().getValue()).isEqualTo(100);
 		assertThat(updatedCoupon.getCouponRemainingStock().getValue()).isEqualTo(0);
+	}
+
+	@Test
+	@Transactional
+	public void getCouponTest() {
+		// given
+		// when
+		CouponReadResponse response = couponService.getCoupon(coupon.getCouponId());
+
+		// then
+		assertThat(response).isNotNull();
+		assertThat(response.couponName()).isEqualTo("3천원 할인 쿠폰");
+		assertThat(response.discountType()).isEqualTo(DiscountType.FIXED);
+		assertThat(response.discountAmount()).isEqualTo(3000);
+		assertThat(coupon.getCouponMaxIssuance().getValue()).isEqualTo(100);
 	}
 }
