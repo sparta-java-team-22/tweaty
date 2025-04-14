@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tweaty.coupon.application.dto.CouponCreateResponse;
 import com.tweaty.coupon.application.dto.CouponIssueResponse;
+import com.tweaty.coupon.application.dto.CouponReadResponse;
 import com.tweaty.coupon.domain.model.Coupon;
 import com.tweaty.coupon.domain.model.CouponIssue;
 import com.tweaty.coupon.domain.repository.CouponIssueRepository;
@@ -68,7 +69,14 @@ public class CouponServiceImpl implements CouponService {
 		return CouponIssueResponse.from(couponIssue);
 	}
 
-	private Coupon getCoupon(UUID couponId) {
+	@Override
+	@Transactional(readOnly = true)
+	public CouponReadResponse getCoupon(UUID couponId) {
+		Coupon coupon = findCoupon(couponId);
+		return CouponReadResponse.from(coupon);
+	}
+
+	private Coupon findCoupon(UUID couponId) {
 		return couponRepository.findByCouponId(couponId)
 			.orElseThrow(() -> new CouponNotFoundException(ErrorCode.COUPON_NOT_FOUND));
 	}
