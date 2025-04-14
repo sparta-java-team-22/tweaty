@@ -150,4 +150,16 @@ class CouponServiceTest {
 		assertThat(response.discountType()).isEqualTo(DiscountType.RATE);
 		assertThat(response.discountAmount()).isEqualTo(10);
 	}
+
+	@Test
+	@Transactional
+	public void softDeleteCouponTest() {
+		// given
+		// when
+		couponService.deleteCoupon(coupon.getCouponId());
+
+		// then
+		assertThat(coupon.getIsDeleted()).isTrue();
+		assertThat(coupon.getDeletedAt()).isNotNull();
+	}
 }
