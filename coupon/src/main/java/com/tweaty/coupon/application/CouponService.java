@@ -18,4 +18,6 @@ public interface CouponService {
 	CouponReadResponse getCoupon(UUID couponId);
 
 	CouponUpdateResponse updateCoupon(UUID couponId, CouponUpdateRequest request);
+
+	void deleteCoupon(UUID couponId);
 }

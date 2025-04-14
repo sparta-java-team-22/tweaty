@@ -86,6 +86,13 @@ public class CouponServiceImpl implements CouponService {
 		return CouponUpdateResponse.from(coupon);
 	}
 
+	@Override
+	@Transactional
+	public void deleteCoupon(UUID couponId) {
+		Coupon coupon = findCoupon(couponId);
+		coupon.softDelete();
+	}
+
 	private Coupon findCoupon(UUID couponId) {
 		return couponRepository.findByCouponId(couponId)
 			.orElseThrow(() -> new CouponNotFoundException(ErrorCode.COUPON_NOT_FOUND));

@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,5 +60,11 @@ public class CouponController {
 	) {
 		CouponUpdateResponse response = couponService.updateCoupon(couponId, request);
 		return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+	}
+
+	@DeleteMapping("/{couponId}")
+	public ResponseEntity<Void> deleteCoupon(@PathVariable UUID couponId) {
+		couponService.deleteCoupon(couponId);
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 	}
 }

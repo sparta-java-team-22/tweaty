@@ -3,6 +3,9 @@ package com.tweaty.coupon.domain.model;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 import com.tweaty.coupon.domain.vo.CouponIssuancePeriod;
 import com.tweaty.coupon.domain.vo.DiscountPolicy;
 import com.tweaty.coupon.domain.vo.Quantity;
@@ -31,6 +34,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor
 @Getter
+@SQLDelete(sql = "UPDATE p_coupon SET is_deleted = true, deleted_at = now() WHERE coupon_id = ?")
+@SQLRestriction("is_deleted = false")
 public class Coupon extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
