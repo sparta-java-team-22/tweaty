@@ -7,6 +7,7 @@ import com.tweaty.coupon.domain.vo.CouponIssuancePeriod;
 import com.tweaty.coupon.domain.vo.DiscountPolicy;
 import com.tweaty.coupon.domain.vo.Quantity;
 import com.tweaty.coupon.presentation.request.CouponCreateRequest;
+import com.tweaty.coupon.presentation.request.CouponUpdateRequest;
 
 import base.BaseEntity;
 import jakarta.persistence.AttributeOverride;
@@ -83,5 +84,24 @@ public class Coupon extends BaseEntity {
 
 	public void updateCouponRemainingStock() {
 		couponRemainingStock.decreaseQuantity();
+	}
+
+	public void updateCoupon(CouponUpdateRequest request) {
+		if (request.getCouponName() != null)
+			this.couponName = request.getCouponName();
+		if (request.getDiscountType() != null && request.getDiscountAmount() != null)
+			this.discountPolicy = DiscountPolicy.from(
+				request.getDiscountType(),
+				request.getDiscountAmount()
+			);
+		if (request.getCouponMaxIssuance() != null)
+			this.couponMaxIssuance = Quantity.from(request.getCouponMaxIssuance());
+		if (request.getCouponIssuanceStartAt() != null && request.getCouponIssuanceEndAt() != null)
+			this.couponIssuancePeriod = CouponIssuancePeriod.of(
+				request.getCouponIssuanceStartAt(),
+				request.getCouponIssuanceEndAt()
+			);
+		if (request.getIsFirstCome() != null)
+			this.isFirstCome = request.getIsFirstCome();
 	}
 }

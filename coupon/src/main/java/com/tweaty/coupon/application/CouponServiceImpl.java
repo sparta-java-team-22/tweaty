@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tweaty.coupon.application.dto.CouponCreateResponse;
 import com.tweaty.coupon.application.dto.CouponIssueResponse;
 import com.tweaty.coupon.application.dto.CouponReadResponse;
+import com.tweaty.coupon.application.dto.CouponUpdateResponse;
 import com.tweaty.coupon.domain.model.Coupon;
 import com.tweaty.coupon.domain.model.CouponIssue;
 import com.tweaty.coupon.domain.repository.CouponIssueRepository;
@@ -21,6 +22,7 @@ import com.tweaty.coupon.exception.CouponNotFoundException;
 import com.tweaty.coupon.exception.CouponOutOfStockException;
 import com.tweaty.coupon.presentation.request.CouponCreateRequest;
 import com.tweaty.coupon.presentation.request.CouponIssueRequest;
+import com.tweaty.coupon.presentation.request.CouponUpdateRequest;
 
 import exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -74,6 +76,14 @@ public class CouponServiceImpl implements CouponService {
 	public CouponReadResponse getCoupon(UUID couponId) {
 		Coupon coupon = findCoupon(couponId);
 		return CouponReadResponse.from(coupon);
+	}
+
+	@Override
+	@Transactional
+	public CouponUpdateResponse updateCoupon(UUID couponId, CouponUpdateRequest request) {
+		Coupon coupon = findCoupon(couponId);
+		coupon.updateCoupon(request);
+		return CouponUpdateResponse.from(coupon);
 	}
 
 	private Coupon findCoupon(UUID couponId) {
