@@ -6,10 +6,10 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tweaty.reservation.application.dto.ReservationResponseDto;
-import com.tweaty.reservation.domain.model.Reservation;
-import com.tweaty.reservation.domain.repository.ReservationRepository;
-import com.tweaty.reservation.presentation.request.ReservationRequestDto;
+import com.tweaty.reservation.application.dto.ReservationScheduleResponseDto;
+import com.tweaty.reservation.domain.model.ReservationSchedule;
+import com.tweaty.reservation.domain.repository.ReservationScheduleRepository;
+import com.tweaty.reservation.presentation.request.ReservationScheduleRequestDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,39 +17,39 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReservationService {
 
-	private final ReservationRepository reservationRepository;
+	private final ReservationScheduleRepository reservationScheduleRepository;
 
-	public void createReservation(ReservationRequestDto requestDto) {
-		reservationRepository.save(new Reservation(requestDto));
+	public void createReservation(ReservationScheduleRequestDto requestDto) {
+		reservationScheduleRepository.save(new ReservationSchedule(requestDto));
 	}
 
 	@Transactional(readOnly = true)
-	public List<ReservationResponseDto> getReservation() {
-		List<Reservation> reservationList = reservationRepository.findAll();
-		if (reservationList.isEmpty()) {
+	public List<ReservationScheduleResponseDto> getReservation() {
+		List<ReservationSchedule> reservationScheduleList = reservationScheduleRepository.findAll();
+		if (reservationScheduleList.isEmpty()) {
 			throw new IllegalArgumentException("예약 일정이 없습니다.");
 		}
-		return ReservationResponseDto.fromList(reservationList);
+		return ReservationScheduleResponseDto.fromList(reservationScheduleList);
 	}
 
 	@Transactional(readOnly = true)
-	public ReservationResponseDto getReservationById(UUID reservationId) {
-		Reservation reservation = reservationRepository.findByIdAndIsDeletedFalse(reservationId)
+	public ReservationScheduleResponseDto getReservationById(UUID reservationId) {
+		ReservationSchedule reservationSchedule = reservationScheduleRepository.findByIdAndIsDeletedFalse(reservationId)
 			.orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
-		return ReservationResponseDto.from(reservation);
+		return ReservationScheduleResponseDto.from(reservationSchedule);
 	}
 
-	public void updateReservation(UUID reservationId, ReservationRequestDto requestDto) {
-		Reservation reservation = reservationRepository.findByIdAndIsDeletedFalse(reservationId)
+	public void updateReservation(UUID reservationId, ReservationScheduleRequestDto requestDto) {
+		ReservationSchedule reservationSchedule = reservationScheduleRepository.findByIdAndIsDeletedFalse(reservationId)
 			.orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
-		reservation.update(requestDto);
-		reservationRepository.save(reservation);
+		reservationSchedule.update(requestDto);
+		reservationScheduleRepository.save(reservationSchedule);
 	}
 
 	public void deleteReservation(UUID reservationId) {
-		Reservation reservation = reservationRepository.findByIdAndIsDeletedFalse(reservationId)
+		ReservationSchedule reservationSchedule = reservationScheduleRepository.findByIdAndIsDeletedFalse(reservationId)
 			.orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
-		reservation.softDelete();
-		reservationRepository.save(reservation);
+		reservationSchedule.softDelete();
+		reservationScheduleRepository.save(reservationSchedule);
 	}
 }

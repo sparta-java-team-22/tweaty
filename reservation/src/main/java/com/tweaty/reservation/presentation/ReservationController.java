@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tweaty.reservation.application.ReservationService;
-import com.tweaty.reservation.application.dto.ReservationResponseDto;
-import com.tweaty.reservation.presentation.request.ReservationRequestDto;
+import com.tweaty.reservation.application.dto.ReservationScheduleResponseDto;
+import com.tweaty.reservation.presentation.request.ReservationScheduleRequestDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,7 +28,7 @@ public class ReservationController {
 	private final ReservationService reservationService;
 
 	@PostMapping
-	public ResponseEntity<?> createReservation(@RequestBody ReservationRequestDto requestDto) {
+	public ResponseEntity<?> createReservation(@RequestBody ReservationScheduleRequestDto requestDto) {
 		reservationService.createReservation(requestDto);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body("예약 일정이 생성되었습니다.");
@@ -43,13 +43,13 @@ public class ReservationController {
 
 	@GetMapping("/{reservationId}")
 	public ResponseEntity<?> getReservationById(@PathVariable UUID reservationId) {
-		ReservationResponseDto reservation = reservationService.getReservationById(reservationId);
+		ReservationScheduleResponseDto reservation = reservationService.getReservationById(reservationId);
 		return ResponseEntity.status(HttpStatus.OK).body(reservation);
 	}
 
 	@PatchMapping("/{reservationId}")
 	public ResponseEntity<?> updateReservation(@PathVariable UUID reservationId,
-		@RequestBody ReservationRequestDto requestDto) {
+		@RequestBody ReservationScheduleRequestDto requestDto) {
 		reservationService.updateReservation(reservationId, requestDto);
 		return ResponseEntity.status(HttpStatus.OK).body("예약 일정이 수정되었습니다.");
 	}
