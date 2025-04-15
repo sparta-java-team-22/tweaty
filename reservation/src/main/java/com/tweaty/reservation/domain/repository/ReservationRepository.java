@@ -10,5 +10,5 @@ public interface ReservationRepository {
 
 	List<Reservation> findAll();
 
-	Optional<Reservation> findByIdAndIsDeletedFalse(Long reservationId);
+	Optional<Reservation> findByIdAndIsDeletedFalse(UUID reservationId);
 }
