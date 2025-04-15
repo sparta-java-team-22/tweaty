@@ -1,6 +1,7 @@
 package com.tweaty.reservation.application;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,20 +33,20 @@ public class ReservationService {
 	}
 
 	@Transactional(readOnly = true)
-	public ReservationResponseDto getReservationById(Long reservationId) {
+	public ReservationResponseDto getReservationById(UUID reservationId) {
 		Reservation reservation = reservationRepository.findByIdAndIsDeletedFalse(reservationId)
 			.orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
 		return ReservationResponseDto.from(reservation);
 	}
 
-	public void updateReservation(Long reservationId, ReservationRequestDto requestDto) {
+	public void updateReservation(UUID reservationId, ReservationRequestDto requestDto) {
 		Reservation reservation = reservationRepository.findByIdAndIsDeletedFalse(reservationId)
 			.orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
 		reservation.update(requestDto);
 		reservationRepository.save(reservation);
 	}
 
-	public void deleteReservation(Long reservationId) {
+	public void deleteReservation(UUID reservationId) {
 		Reservation reservation = reservationRepository.findByIdAndIsDeletedFalse(reservationId)
 			.orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
 		reservation.softDelete();
