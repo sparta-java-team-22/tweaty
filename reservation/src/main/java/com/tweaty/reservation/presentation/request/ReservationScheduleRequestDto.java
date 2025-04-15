@@ -5,7 +5,7 @@ import java.util.UUID;
 import lombok.Getter;
 
 @Getter
-public class ReservationRequestDto {
+public class ReservationScheduleRequestDto {
 	private UUID storeId;
 	private int tableCount;
 	private int reservationTableCount;

@@ -2,7 +2,7 @@ package com.tweaty.reservation.domain.model;
 
 import java.util.UUID;
 
-import com.tweaty.reservation.presentation.request.ReservationRequestDto;
+import com.tweaty.reservation.presentation.request.ReservationScheduleRequestDto;
 
 import base.BaseEntity;
 import jakarta.persistence.Column;
@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @Table(name = "p_reservation")
-public class Reservation extends BaseEntity {
+public class ReservationSchedule extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	@Column(name = "id", updatable = false, nullable = false)
@@ -48,18 +48,18 @@ public class Reservation extends BaseEntity {
 	@Column(name = "table_four", nullable = false)
 	private int tableFour;
 
-	public Reservation(ReservationRequestDto reservationRequestDto) {
-		this.storeId = reservationRequestDto.getStoreId();
-		this.tableCount = reservationRequestDto.getTableCount();
-		this.reservationTableCount = reservationRequestDto.getReservationTableCount();
-		this.reservationTime = reservationRequestDto.getReservationTime();
-		this.reservationDate = reservationRequestDto.getReservationDate();
-		this.currentCapacity = reservationRequestDto.getCurrentCapacity();
-		this.tableTwo = reservationRequestDto.getTableTwo();
-		this.tableFour = reservationRequestDto.getTableFour();
+	public ReservationSchedule(ReservationScheduleRequestDto reservationScheduleRequestDto) {
+		this.storeId = reservationScheduleRequestDto.getStoreId();
+		this.tableCount = reservationScheduleRequestDto.getTableCount();
+		this.reservationTableCount = reservationScheduleRequestDto.getReservationTableCount();
+		this.reservationTime = reservationScheduleRequestDto.getReservationTime();
+		this.reservationDate = reservationScheduleRequestDto.getReservationDate();
+		this.currentCapacity = reservationScheduleRequestDto.getCurrentCapacity();
+		this.tableTwo = reservationScheduleRequestDto.getTableTwo();
+		this.tableFour = reservationScheduleRequestDto.getTableFour();
 	}
 
-	public void update(ReservationRequestDto requestDto) {
+	public void update(ReservationScheduleRequestDto requestDto) {
 		this.storeId = requestDto.getStoreId();
 		this.tableCount = requestDto.getTableCount();
 		this.reservationTableCount = requestDto.getReservationTableCount();
