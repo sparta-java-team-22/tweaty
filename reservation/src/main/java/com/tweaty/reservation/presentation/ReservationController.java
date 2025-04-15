@@ -41,20 +41,20 @@ public class ReservationController {
 	}
 
 	@GetMapping("/{reservationId}")
-	public ResponseEntity<?> getReservationById(@PathVariable Long reservationId) {
+	public ResponseEntity<?> getReservationById(@PathVariable UUID reservationId) {
 		ReservationResponseDto reservation = reservationService.getReservationById(reservationId);
 		return ResponseEntity.status(HttpStatus.OK).body(reservation);
 	}
 
 	@PatchMapping("/{reservationId}")
-	public ResponseEntity<?> updateReservation(@PathVariable Long reservationId,
+	public ResponseEntity<?> updateReservation(@PathVariable UUID reservationId,
 		@RequestBody ReservationRequestDto requestDto) {
 		reservationService.updateReservation(reservationId, requestDto);
 		return ResponseEntity.status(HttpStatus.OK).body("예약 일정이 수정되었습니다.");
 	}
 
 	@DeleteMapping("/{reservationId}")
-	public ResponseEntity<?> deleteReservation(@PathVariable Long reservationId) {
+	public ResponseEntity<?> deleteReservation(@PathVariable UUID reservationId) {
 		reservationService.deleteReservation(reservationId);
 		return ResponseEntity.status(HttpStatus.OK).body("예약 일정이 삭제되었습니다.");
 	}
