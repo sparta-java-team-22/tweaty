@@ -3,10 +3,14 @@ package com.tweaty.coupon.domain.model;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 import com.tweaty.coupon.domain.vo.CouponIssuancePeriod;
 import com.tweaty.coupon.domain.vo.DiscountPolicy;
 import com.tweaty.coupon.domain.vo.Quantity;
 import com.tweaty.coupon.presentation.request.CouponCreateRequest;
+import com.tweaty.coupon.presentation.request.CouponUpdateRequest;
 
 import base.BaseEntity;
 import jakarta.persistence.AttributeOverride;
@@ -30,6 +34,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor
 @Getter
+@SQLDelete(sql = "UPDATE p_coupon SET is_deleted = true, deleted_at = now() WHERE coupon_id = ?")
+@SQLRestriction("is_deleted = false")
 public class Coupon extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
@@ -83,5 +89,24 @@ public class Coupon extends BaseEntity {
 
 	public void updateCouponRemainingStock() {
 		couponRemainingStock.decreaseQuantity();
+	}
+
+	public void updateCoupon(CouponUpdateRequest request) {
+		if (request.getCouponName() != null)
+			this.couponName = request.getCouponName();
+		if (request.getDiscountType() != null && request.getDiscountAmount() != null)
+			this.discountPolicy = DiscountPolicy.from(
+				request.getDiscountType(),
+				request.getDiscountAmount()
+			);
+		if (request.getCouponMaxIssuance() != null)
+			this.couponMaxIssuance = Quantity.from(request.getCouponMaxIssuance());
+		if (request.getCouponIssuanceStartAt() != null && request.getCouponIssuanceEndAt() != null)
+			this.couponIssuancePeriod = CouponIssuancePeriod.of(
+				request.getCouponIssuanceStartAt(),
+				request.getCouponIssuanceEndAt()
+			);
+		if (request.getIsFirstCome() != null)
+			this.isFirstCome = request.getIsFirstCome();
 	}
 }

@@ -15,13 +15,17 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tweaty.coupon.application.dto.CouponCreateResponse;
+import com.tweaty.coupon.application.dto.CouponReadResponse;
+import com.tweaty.coupon.application.dto.CouponUpdateResponse;
 import com.tweaty.coupon.domain.model.Coupon;
+import com.tweaty.coupon.domain.model.DiscountType;
 import com.tweaty.coupon.domain.repository.CouponRepository;
 import com.tweaty.coupon.domain.vo.CouponIssuancePeriod;
 import com.tweaty.coupon.domain.vo.DiscountPolicy;
 import com.tweaty.coupon.domain.vo.Quantity;
 import com.tweaty.coupon.presentation.request.CouponCreateRequest;
 import com.tweaty.coupon.presentation.request.CouponIssueRequest;
+import com.tweaty.coupon.presentation.request.CouponUpdateRequest;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -106,5 +110,56 @@ class CouponServiceTest {
 
 		assertThat(updatedCoupon.getCouponMaxIssuance().getValue()).isEqualTo(100);
 		assertThat(updatedCoupon.getCouponRemainingStock().getValue()).isEqualTo(0);
+	}
+
+	@Test
+	@Transactional
+	public void getCouponTest() {
+		// given
+		// when
+		CouponReadResponse response = couponService.getCoupon(coupon.getCouponId());
+
+		// then
+		assertThat(response).isNotNull();
+		assertThat(response.couponName()).isEqualTo("3천원 할인 쿠폰");
+		assertThat(response.discountType()).isEqualTo(DiscountType.FIXED);
+		assertThat(response.discountAmount()).isEqualTo(3000);
+		assertThat(coupon.getCouponMaxIssuance().getValue()).isEqualTo(100);
+	}
+
+	@Test
+	@Transactional
+	public void updateCouponTest() {
+		// given
+		CouponUpdateRequest request = new CouponUpdateRequest(
+			"10% 할인 쿠폰",
+			"정률",
+			10,
+			null,
+			null,
+			null,
+			null
+		);
+
+		// when
+		CouponUpdateResponse response = couponService.updateCoupon(coupon.getCouponId(), request);
+
+		// then
+		assertThat(response).isNotNull();
+		assertThat(response.couponName()).isEqualTo("10% 할인 쿠폰");
+		assertThat(response.discountType()).isEqualTo(DiscountType.RATE);
+		assertThat(response.discountAmount()).isEqualTo(10);
+	}
+
+	@Test
+	@Transactional
+	public void softDeleteCouponTest() {
+		// given
+		// when
+		couponService.deleteCoupon(coupon.getCouponId());
+
+		// then
+		assertThat(coupon.getIsDeleted()).isTrue();
+		assertThat(coupon.getDeletedAt()).isNotNull();
 	}
 }
