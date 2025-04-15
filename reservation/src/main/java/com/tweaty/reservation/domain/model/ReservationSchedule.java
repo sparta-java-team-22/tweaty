@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "p_reservation")
+@Table(name = "p_reservation_schedule")
 public class ReservationSchedule extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
