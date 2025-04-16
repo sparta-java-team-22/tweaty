@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tweaty.reservation.application.ReservationService;
+import com.tweaty.reservation.application.ReservationScheduleService;
 import com.tweaty.reservation.application.dto.ReservationScheduleResponseDto;
 import com.tweaty.reservation.presentation.request.ReservationScheduleRequestDto;
 
@@ -25,38 +25,38 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/reservation/plan")
 public class ReservationScheduleController {
 
-	private final ReservationService reservationService;
+	private final ReservationScheduleService reservationScheduleService;
 
 	@PostMapping
 	public ResponseEntity<?> createReservation(@RequestBody ReservationScheduleRequestDto requestDto) {
-		reservationService.createReservation(requestDto);
+		reservationScheduleService.createReservation(requestDto);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body("예약 일정이 생성되었습니다.");
 	}
 
 	@GetMapping
 	public ResponseEntity<?> getReservation() {
-		List<?> reservationList = reservationService.getReservation();
+		List<?> reservationList = reservationScheduleService.getReservation();
 
 		return ResponseEntity.status(HttpStatus.OK).body(reservationList);
 	}
 
 	@GetMapping("/{reservationId}")
 	public ResponseEntity<?> getReservationById(@PathVariable UUID reservationId) {
-		ReservationScheduleResponseDto reservation = reservationService.getReservationById(reservationId);
+		ReservationScheduleResponseDto reservation = reservationScheduleService.getReservationById(reservationId);
 		return ResponseEntity.status(HttpStatus.OK).body(reservation);
 	}
 
 	@PatchMapping("/{reservationId}")
 	public ResponseEntity<?> updateReservation(@PathVariable UUID reservationId,
 		@RequestBody ReservationScheduleRequestDto requestDto) {
-		reservationService.updateReservation(reservationId, requestDto);
+		reservationScheduleService.updateReservation(reservationId, requestDto);
 		return ResponseEntity.status(HttpStatus.OK).body("예약 일정이 수정되었습니다.");
 	}
 
 	@DeleteMapping("/{reservationId}")
 	public ResponseEntity<?> deleteReservation(@PathVariable UUID reservationId) {
-		reservationService.deleteReservation(reservationId);
+		reservationScheduleService.deleteReservation(reservationId);
 		return ResponseEntity.status(HttpStatus.OK).body("예약 일정이 삭제되었습니다.");
 	}
 
