@@ -5,3 +5,63 @@ spring:
     web-application-type: reactive
   profiles:
     active: local
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: auth
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/v1/auth/**
+
+        - id: user-users
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/users/**
+
+        - id: user-admin-users
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/admin/users/**
+
+        - id: user-admin-users-index
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/admin/users
+
+        - id: store
+          uri: lb://store-service
+          predicates:
+            - Path=/api/v1/stores/**
+
+        - id: reservation
+          uri: lb://reservation-service
+          predicates:
+            - Path=/api/v1/reservations/**
+
+        - id: waiting
+          uri: lb://waiting-service
+          predicates:
+            - Path=/api/v1/waitings/**
+
+        - id: payment
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/v1/payments/**
+
+        - id: coupon
+          uri: lb://coupon-service
+          predicates:
+            - Path=/api/v1/coupons/**
+
+        - id: promotion
+          uri: lb://promotion-service
+          predicates:
+            - Path=/api/v1/promotions/**
+
+        - id: notification
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/v1/notifications/**
