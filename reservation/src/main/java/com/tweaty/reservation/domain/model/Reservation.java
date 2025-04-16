@@ -1,5 +1,7 @@
 package com.tweaty.reservation.domain.model;
 
+import java.util.UUID;
+
 import base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,13 +21,13 @@ public class Reservation extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	@Column(name = "id", updatable = false, nullable = false)
-	private String id;
+	private UUID id;
 
 	@Column(name = "store_id", nullable = false)
-	private String storeId;
+	private UUID storeId;
 
 	@Column(name = "user_id", nullable = false)
-	private String userId;
+	private UUID userId;
 
 	@Column(name = "guest_count", nullable = false)
 	private int guestCount;
