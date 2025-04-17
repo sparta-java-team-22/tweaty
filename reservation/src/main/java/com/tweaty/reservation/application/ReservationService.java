@@ -1,8 +1,11 @@
 package com.tweaty.reservation.application;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tweaty.reservation.application.dto.ReservationResponseDto;
 import com.tweaty.reservation.domain.model.Reservation;
 import com.tweaty.reservation.domain.model.ReservationSchedule;
 import com.tweaty.reservation.domain.repository.ReservationRepository;
@@ -42,5 +45,12 @@ public class ReservationService {
 		reservationSchedule.updateTakenCount(requestDto.getGuestCount());
 
 		reservationRepository.save(new Reservation(requestDto));
+	}
+
+	public ReservationResponseDto getReservationById(UUID reservationId) {
+		Reservation reservation = reservationRepository.findByIdAndIsDeletedFalse(reservationId)
+			.orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
+		
+		return ReservationResponseDto.from(reservation);
 	}
 }
