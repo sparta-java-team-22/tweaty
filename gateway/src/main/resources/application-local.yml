@@ -7,3 +7,6 @@ eureka:
       defaultZone: http://eureka-service:19090/eureka/
     register-with-eureka: true
     fetch-registry: true
+
+jwt:
+  secret: ${JWT_SECRET}
