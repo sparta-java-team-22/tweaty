@@ -6,7 +6,7 @@ import java.util.UUID;
 import com.tweaty.reservation.domain.model.Reservation;
 
 public interface ReservationRepository {
-	void save(Reservation reservation);
+	Reservation save(Reservation reservation);
 
 	Optional<Reservation> findByIdAndIsDeletedFalse(UUID reservationId);
 }

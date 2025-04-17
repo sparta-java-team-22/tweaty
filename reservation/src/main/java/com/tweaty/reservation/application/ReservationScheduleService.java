@@ -24,8 +24,8 @@ public class ReservationScheduleService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<ReservationScheduleResponseDto> getReservation() {
-		List<ReservationSchedule> reservationScheduleList = reservationScheduleRepository.findAll();
+	public List<ReservationScheduleResponseDto> getReservation(UUID storeId) {
+		List<ReservationSchedule> reservationScheduleList = reservationScheduleRepository.findByStoreId(storeId);
 		if (reservationScheduleList.isEmpty()) {
 			throw new IllegalArgumentException("예약 일정이 없습니다.");
 		}

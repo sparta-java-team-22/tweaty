@@ -34,9 +34,9 @@ public class ReservationScheduleController {
 		return ResponseEntity.status(HttpStatus.CREATED).body("예약 일정이 생성되었습니다.");
 	}
 
-	@GetMapping
-	public ResponseEntity<?> getReservation() {
-		List<?> reservationList = reservationScheduleService.getReservation();
+	@GetMapping("/{storeId}")
+	public ResponseEntity<?> getReservation(@PathVariable UUID storeId) {
+		List<?> reservationList = reservationScheduleService.getReservation(storeId);
 
 		return ResponseEntity.status(HttpStatus.OK).body(reservationList);
 	}

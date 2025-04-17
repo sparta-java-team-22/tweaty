@@ -37,9 +37,9 @@ public class Reservation extends BaseEntity {
 	@Column(name = "status", nullable = false)
 	private ReservationStatus status;
 
-	public Reservation(ReservationRequestDto requestDto) {
+	public Reservation(ReservationRequestDto requestDto, UUID userId) {
 		this.storeId = requestDto.getStoreId();
-		this.userId = null;
+		this.userId = userId;
 		this.guestCount = requestDto.getGuestCount();
 		this.status = ReservationStatus.COMPLETED;
 	}

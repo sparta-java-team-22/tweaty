@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,8 +26,9 @@ public class ReservationController {
 	private final ReservationService reservationService;
 
 	@PostMapping
-	public ResponseEntity<?> createReservation(@RequestBody ReservationRequestDto requestDto) {
-		reservationService.createReservation(requestDto);
+	public ResponseEntity<?> createReservation(@RequestBody ReservationRequestDto requestDto,
+		@RequestHeader("X-USER-ID") UUID userId) {
+		reservationService.createReservation(requestDto, userId);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body("예약이 생성되었습니다.");
 	}

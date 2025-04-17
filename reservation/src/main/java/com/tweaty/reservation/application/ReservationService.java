@@ -22,7 +22,7 @@ public class ReservationService {
 	private final ReservationScheduleRepository reservationScheduleRepository;
 
 	@Transactional
-	public void createReservation(ReservationRequestDto requestDto) {
+	public void createReservation(ReservationRequestDto requestDto, UUID userId) {
 		ReservationSchedule reservationSchedule = reservationScheduleRepository.findByIdAndIsDeletedFalse(
 				requestDto.getReservationScheduleId())
 			.orElseThrow(() -> new IllegalArgumentException("예약 일정을 찾을 수 없습니다."));
@@ -44,13 +44,13 @@ public class ReservationService {
 		}
 		reservationSchedule.updateTakenCount(requestDto.getGuestCount());
 
-		reservationRepository.save(new Reservation(requestDto));
+		reservationRepository.save(new Reservation(requestDto, userId));
 	}
 
 	public ReservationResponseDto getReservationById(UUID reservationId) {
 		Reservation reservation = reservationRepository.findByIdAndIsDeletedFalse(reservationId)
 			.orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
-		
+
 		return ReservationResponseDto.from(reservation);
 	}
 }

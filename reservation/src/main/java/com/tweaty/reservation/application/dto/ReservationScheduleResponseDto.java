@@ -11,8 +11,8 @@ import lombok.Getter;
 public class ReservationScheduleResponseDto {
 	private UUID id;
 	private UUID storeId;
-	private int tableCount;
-	private int reservationTableCount;
+	private int reservationTableTwoCount;
+	private int reservationTableFourCount;
 	private String reservationTime;
 	private String reservationDate;
 	private int currentCapacity;
@@ -24,8 +24,8 @@ public class ReservationScheduleResponseDto {
 			ReservationScheduleResponseDto reservationScheduleResponseDto = new ReservationScheduleResponseDto();
 			reservationScheduleResponseDto.id = reservationSchedule.getId();
 			reservationScheduleResponseDto.storeId = reservationSchedule.getStoreId();
-			reservationScheduleResponseDto.tableCount = reservationSchedule.getTableCount();
-			reservationScheduleResponseDto.reservationTableCount = reservationSchedule.getReservationTableCount();
+			reservationScheduleResponseDto.reservationTableTwoCount = reservationSchedule.getReservationTableTwoCount();
+			reservationScheduleResponseDto.reservationTableFourCount = reservationSchedule.getReservationTableFourCount();
 			reservationScheduleResponseDto.reservationTime = reservationSchedule.getReservationTime();
 			reservationScheduleResponseDto.reservationDate = reservationSchedule.getReservationDate();
 			reservationScheduleResponseDto.currentCapacity = reservationSchedule.getCurrentCapacity();
@@ -39,8 +39,8 @@ public class ReservationScheduleResponseDto {
 		ReservationScheduleResponseDto reservationScheduleResponseDto = new ReservationScheduleResponseDto();
 		reservationScheduleResponseDto.id = reservationSchedule.getId();
 		reservationScheduleResponseDto.storeId = reservationSchedule.getStoreId();
-		reservationScheduleResponseDto.tableCount = reservationSchedule.getTableCount();
-		reservationScheduleResponseDto.reservationTableCount = reservationSchedule.getReservationTableCount();
+		reservationScheduleResponseDto.reservationTableTwoCount = reservationSchedule.getReservationTableTwoCount();
+		reservationScheduleResponseDto.reservationTableFourCount = reservationSchedule.getReservationTableFourCount();
 		reservationScheduleResponseDto.reservationTime = reservationSchedule.getReservationTime();
 		reservationScheduleResponseDto.reservationDate = reservationSchedule.getReservationDate();
 		reservationScheduleResponseDto.currentCapacity = reservationSchedule.getCurrentCapacity();

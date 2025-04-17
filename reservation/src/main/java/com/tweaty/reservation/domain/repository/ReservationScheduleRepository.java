@@ -7,9 +7,11 @@ import java.util.UUID;
 import com.tweaty.reservation.domain.model.ReservationSchedule;
 
 public interface ReservationScheduleRepository {
-	void save(ReservationSchedule reservationSchedule);
+	ReservationSchedule save(ReservationSchedule reservationSchedule);
 
 	List<ReservationSchedule> findAll();
 
 	Optional<ReservationSchedule> findByIdAndIsDeletedFalse(UUID reservationId);
+
+	List<ReservationSchedule> findByStoreId(UUID storeId);
 }
