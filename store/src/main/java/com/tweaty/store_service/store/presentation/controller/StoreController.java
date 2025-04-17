@@ -1,7 +1,6 @@
 package com.tweaty.store_service.store.presentation.controller;
 
 import java.util.UUID;
-
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;

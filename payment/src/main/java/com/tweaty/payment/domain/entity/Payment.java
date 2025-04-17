@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.UuidGenerator;
 
+import com.tweaty.payment.infrastucture.kafka.event.PaymentCreateEvent;
 import com.tweaty.payment.presentation.dto.request.PaymentRequestDto;
 
 import base.BaseEntity;
@@ -79,5 +80,27 @@ public class Payment extends BaseEntity {
 		this.status = PaymentType.REFUNDED;
 	}
 
+
+	public static Payment toReadyEntity(PaymentCreateEvent event) {
+		return Payment.builder()
+			.userId(event.getUserId())
+			.storeId(event.getStoreId())
+			.originalAmount(event.getOriginalAmount())
+			.status(PaymentType.READY)
+			.method(MethodType.valueOf(event.getMethod()))
+			.couponId(event.getCouponId())
+			.build();
+	}
+
+	public static Payment toFailedEntity(PaymentCreateEvent event) {
+		return Payment.builder()
+			.userId(event.getUserId())
+			.storeId(event.getStoreId())
+			.originalAmount(event.getOriginalAmount())
+			.status(PaymentType.FAIL)
+			.method(MethodType.valueOf(event.getMethod()))
+			.couponId(event.getCouponId())
+			.build();
+	}
 
 }

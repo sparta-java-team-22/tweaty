@@ -18,6 +18,11 @@ import com.tweaty.payment.domain.repository.PaymentRepository;
 import com.tweaty.payment.domain.repository.RefundRepository;
 import com.tweaty.payment.domain.service.PaymentDomainService;
 import com.tweaty.payment.global.exception.CustomException;
+import com.tweaty.payment.infrastucture.kafka.event.PaymentFailedEvent;
+import com.tweaty.payment.infrastucture.kafka.producer.KafkaPaymentProducer;
+import com.tweaty.payment.infrastucture.kafka.producer.KafkaRefundProducer;
+import com.tweaty.payment.infrastucture.kafka.event.PaymentSuccessEvent;
+import com.tweaty.payment.infrastucture.kafka.event.RefundSuccessEvent;
 import com.tweaty.payment.presentation.dto.request.PaymentRequestDto;
 import com.tweaty.payment.presentation.dto.request.RefundRequestDto;
 import com.tweaty.payment.presentation.dto.response.PaymentResponseDto;
@@ -36,6 +41,9 @@ public class PaymentServiceImpl implements PaymentService {
 	private final PaymentDomainService paymentDomainService;
 
 	private final RefundRepository refundRepository;
+
+	private final KafkaPaymentProducer kafkaPaymentProducer;
+	private final KafkaRefundProducer kafkaRefundProducer;
 
 	@Override
 	@Transactional
@@ -63,10 +71,13 @@ public class PaymentServiceImpl implements PaymentService {
 			payment.successPayment();
 			paymentRepository.save(payment);
 
+			// kafkaPaymentProducer.sendSuccessEvent(PaymentSuccessEvent.toDto(payment));
+
 		} catch (Exception e) {
 			log.error("결제실패 : {}", e.getMessage());
 			payment.failPayment();
 			paymentRepository.save(payment);
+			// kafkaPaymentProducer.sendFailedEvent(PaymentFailedEvent.toDto(payment));
 			throw new CustomException(ErrorCode.PAYMENT_FAIL, HttpStatus.BAD_REQUEST);
 		}
 		return payment.getId();
@@ -98,6 +109,9 @@ public class PaymentServiceImpl implements PaymentService {
 			refund.successRefund();
 			payment.successRefund();
 			refundRepository.save(refund);
+
+			kafkaRefundProducer.send(RefundSuccessEvent.toDto(refund));
+
 		} catch (Exception e) {
 			log.error("환불 실패 : {}", e.getMessage());
 			refund.failRefund();

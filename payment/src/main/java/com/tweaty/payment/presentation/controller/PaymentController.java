@@ -16,6 +16,8 @@ import com.tweaty.payment.application.dto.PaymentIdDto;
 import com.tweaty.payment.application.dto.RefundIdDto;
 import com.tweaty.payment.application.service.PaymentService;
 import com.tweaty.payment.global.SuccessResponse;
+import com.tweaty.payment.infrastucture.kafka.event.PaymentCreateEvent;
+import com.tweaty.payment.infrastucture.kafka.producer.KafkaPaymentProducer;
 import com.tweaty.payment.presentation.dto.request.PaymentRequestDto;
 import com.tweaty.payment.presentation.dto.request.RefundRequestDto;
 import com.tweaty.payment.presentation.dto.response.PaymentListResponse;
@@ -31,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 public class PaymentController {
 
 	private final PaymentService paymentService;
+	private final KafkaPaymentProducer kafkaPaymentProducer;
 
 	@PostMapping("/{storeId}")
 	public ResponseEntity<?> createPayment(@RequestBody PaymentRequestDto req, @PathVariable UUID storeId) {
@@ -42,6 +45,30 @@ public class PaymentController {
 
 		return SuccessResponse.successWith(200, "결제 생성 성공", paymentIdDto);
 	}
+
+
+	@PostMapping("/{storeId}/kafka")
+	public ResponseEntity<?> createKafkaPayment(@RequestBody PaymentRequestDto req, @PathVariable UUID storeId) {
+
+		// TODO: 유저아이디 헤더 추가
+		UUID userId = UUID.fromString("d263308c-5bf0-4362-9c51-a4c42c123456");
+
+		PaymentCreateEvent event = PaymentCreateEvent.builder()
+			.userId(userId)
+			.storeId(storeId)
+			.couponId(req.getCouponId())
+			.originalAmount(req.getOriginalAmount())
+			.method(req.getMethod().name())
+			.build();
+
+		kafkaPaymentProducer.sendCreateEvent(event);
+
+
+
+		return SuccessResponse.successWith(200, "결제 생성 성공(kafka)", null);
+	}
+
+
 
 	@GetMapping
 	public ResponseEntity<?> getPaymentList(@RequestParam(defaultValue = "0") int page,

@@ -26,7 +26,6 @@ public class PaymentRequestDto {
 
 
 
-	@Builder
 	public Payment toEntity(UUID storeId,int discountAmount, int finalAmount) {
 		return Payment.builder()
 			.storeId(storeId)
