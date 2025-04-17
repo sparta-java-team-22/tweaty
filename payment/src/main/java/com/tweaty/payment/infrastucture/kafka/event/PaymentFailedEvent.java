@@ -16,13 +16,13 @@ import lombok.NoArgsConstructor;
 public class PaymentFailedEvent {
 	private UUID paymentId;
 	private UUID userId;
-	private UUID storeId;
+	private UUID reservationId;
 
 	public static PaymentFailedEvent toDto(Payment payment) {
 		return PaymentFailedEvent.builder()
 			.paymentId(payment.getId())
 			.userId(payment.getUserId())
-			.storeId(payment.getStoreId())
+			.reservationId(payment.getReservationId())
 			.build();
 	}
 }

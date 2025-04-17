@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class PaymentSuccessEvent {
 	private UUID paymentId;
 	private UUID userId;
-	private UUID storeId;
+	private UUID reservationId;
 	private int finalAmount;
 	private String method;
 
@@ -26,7 +26,7 @@ public class PaymentSuccessEvent {
 		return PaymentSuccessEvent.builder()
 			.paymentId(payment.getId())
 			.userId(payment.getUserId())
-			.storeId(payment.getStoreId())
+			.reservationId(payment.getReservationId())
 			.finalAmount(payment.getFinalAmount())
 			.method(payment.getMethod().name())
 			.build();

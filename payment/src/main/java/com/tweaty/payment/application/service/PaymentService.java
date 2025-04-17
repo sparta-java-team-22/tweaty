@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 
+import com.tweaty.payment.domain.entity.Payment;
 import com.tweaty.payment.domain.entity.Refund;
 import com.tweaty.payment.presentation.dto.request.PaymentRequestDto;
 import com.tweaty.payment.presentation.dto.request.RefundRequestDto;
@@ -12,7 +13,7 @@ import com.tweaty.payment.presentation.dto.response.RefundResponseDto;
 
 public interface PaymentService {
 
-	UUID createPayment(PaymentRequestDto req, UUID userId, UUID storeId);
+	UUID createPayment(Payment payment);
 
 	Page<PaymentResponseDto> getPayment(UUID userId, int page, int size);
 

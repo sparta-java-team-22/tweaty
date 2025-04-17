@@ -19,11 +19,10 @@ public class KafkaPaymentProducer {
 	private final KafkaTemplate<String, PaymentSuccessEvent> kafkaSuccessTemplate;
 	private final KafkaTemplate<String, PaymentFailedEvent> kafkaFailedTemplate;
 	private final KafkaTemplate<String, PaymentCreateEvent> kafkaCreateTemplate;
-	private final static String TOPIC_NAME = "payment-success";
 
 	public void sendSuccessEvent(PaymentSuccessEvent event) {
 		log.info(" Kafka 발행: {}", event);
-		kafkaSuccessTemplate.send(TOPIC_NAME, event);
+		kafkaSuccessTemplate.send("payment-success", event);
 	}
 
 	public void sendFailedEvent(PaymentFailedEvent event) {

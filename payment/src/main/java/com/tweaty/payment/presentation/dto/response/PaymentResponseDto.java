@@ -19,7 +19,7 @@ public class PaymentResponseDto {
 	@NotEmpty
 	private UUID id;
 	@NotEmpty
-	private UUID storeId;
+	private UUID reservationId;
 	private UUID couponId;
 
 	@NotEmpty
@@ -33,7 +33,7 @@ public class PaymentResponseDto {
 	public static PaymentResponseDto toDto(Payment payment) {
 		return PaymentResponseDto.builder()
 			.id(payment.getId())
-			.storeId(payment.getStoreId())
+			.reservationId(payment.getReservationId())
 			.couponId(payment.getCouponId())
 			.finalAmount(payment.getFinalAmount())
 			.method(payment.getMethod())

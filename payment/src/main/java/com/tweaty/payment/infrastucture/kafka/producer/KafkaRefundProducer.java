@@ -3,8 +3,10 @@ package com.tweaty.payment.infrastucture.kafka.producer;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tweaty.payment.infrastucture.kafka.event.PaymentFailedEvent;
+import com.tweaty.payment.infrastucture.kafka.event.PaymentSuccessEvent;
+import com.tweaty.payment.infrastucture.kafka.event.RefundCreateEvent;
+import com.tweaty.payment.infrastucture.kafka.event.RefundFailedEvent;
 import com.tweaty.payment.infrastucture.kafka.event.RefundSuccessEvent;
 
 import lombok.RequiredArgsConstructor;
@@ -15,18 +17,25 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class KafkaRefundProducer {
 
-	private final KafkaTemplate<String, String> kafkaTemplate;
-	private final ObjectMapper objectMapper;
+	private final KafkaTemplate<String, RefundCreateEvent> kafkaRefundCreateTemplate;
+	private final KafkaTemplate<String, RefundSuccessEvent> kafkaRefundSuccessTemplate;
+	private final KafkaTemplate<String, RefundFailedEvent> kafkaRefundFailedTemplate;
 
-	private static final String TOPIC = "refund-success";
 
-	public void send(RefundSuccessEvent event) {
-		try {
-			String payload = objectMapper.writeValueAsString(event);
-			kafkaTemplate.send(TOPIC, payload);
-			log.info("RefundSuccessEvent sent: {}", payload);
-		} catch (JsonProcessingException e) {
-			log.error("Failed to send RefundSuccessEvent", e);
-		}
+
+	public void sendSuccessEvent(RefundSuccessEvent event) {
+		log.info(" Kafka 발행: {}", event);
+		kafkaRefundSuccessTemplate.send("refund-success", event);
+	}
+
+	public void sendFailedEvent(RefundFailedEvent event) {
+		kafkaRefundFailedTemplate.send("payment-failed", event);
+		log.info("PaymentFailedEvent sent to Kafka: {}", event);
+	}
+
+
+	public void sendRefundEvent(RefundCreateEvent event) {
+		log.info("환불 요청 이벤트 발행됨: {}", event);
+		kafkaRefundCreateTemplate.send("refund-create", event);
 	}
 }

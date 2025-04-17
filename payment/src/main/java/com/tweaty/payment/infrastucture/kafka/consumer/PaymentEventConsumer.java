@@ -1,13 +1,16 @@
 package com.tweaty.payment.infrastucture.kafka.consumer;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tweaty.payment.domain.entity.DiscountType;
 import com.tweaty.payment.domain.entity.Payment;
+import com.tweaty.payment.domain.entity.PaymentType;
 import com.tweaty.payment.domain.repository.PaymentRepository;
 import com.tweaty.payment.domain.service.PaymentDomainService;
+import com.tweaty.payment.global.exception.CustomException;
 import com.tweaty.payment.infrastucture.client.CouponClient;
 import com.tweaty.payment.infrastucture.kafka.event.PaymentCreateEvent;
 import com.tweaty.payment.infrastucture.kafka.event.PaymentFailedEvent;
@@ -15,6 +18,7 @@ import com.tweaty.payment.infrastucture.kafka.event.PaymentSuccessEvent;
 import com.tweaty.payment.infrastucture.kafka.producer.KafkaPaymentProducer;
 import com.tweaty.payment.presentation.dto.response.CouponReadResponse;
 
+import exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,11 +50,9 @@ public class PaymentEventConsumer {
 	public void handleCreatePayment(PaymentCreateEvent event) {
 		log.info("결제 생성 이벤트 수신: {}", event);
 
-		Payment payment = Payment.toReadyEntity(event);
-		paymentDomainService.saveReadyPayment(payment);
+		Payment payment = paymentDomainService.findPayment(event.getPaymentId());
 
 		try {
-			// TODO: 실제 할인 적용은 coupon-service 연동 필요 (지금은 mock)
 			if (event.getCouponId() != null) {
 				CouponReadResponse coupon = couponClient.getCouponTest(event.getCouponId());
 				int finalAmount = paymentDomainService.calculateDiscount(
@@ -61,7 +63,7 @@ public class PaymentEventConsumer {
 
 			payment.successPayment();
 			paymentRepository.save(payment);
-			log.info(" [Kafka 처리 완료] Payment 저장!");
+			log.info(" [Kafka 처리 완료] Payment 저장");
 
 			kafkaPaymentProducer.sendSuccessEvent(PaymentSuccessEvent.toDto(payment));
 

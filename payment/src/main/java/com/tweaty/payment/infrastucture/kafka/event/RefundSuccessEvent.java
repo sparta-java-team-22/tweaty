@@ -19,7 +19,6 @@ public class RefundSuccessEvent {
 	private UUID paymentId;
 	private int refundAmount;
 
-
 	public static RefundSuccessEvent toDto(Refund refund) {
 		return RefundSuccessEvent.builder()
 			.refundId(refund.getId())
