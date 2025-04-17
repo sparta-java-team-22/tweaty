@@ -18,6 +18,7 @@ import com.tweaty.payment.domain.repository.PaymentRepository;
 import com.tweaty.payment.domain.repository.RefundRepository;
 import com.tweaty.payment.domain.service.PaymentDomainService;
 import com.tweaty.payment.global.exception.CustomException;
+import com.tweaty.payment.infrastucture.client.CouponClient;
 import com.tweaty.payment.infrastucture.kafka.event.PaymentFailedEvent;
 import com.tweaty.payment.infrastucture.kafka.producer.KafkaPaymentProducer;
 import com.tweaty.payment.infrastucture.kafka.producer.KafkaRefundProducer;
@@ -25,6 +26,7 @@ import com.tweaty.payment.infrastucture.kafka.event.PaymentSuccessEvent;
 import com.tweaty.payment.infrastucture.kafka.event.RefundSuccessEvent;
 import com.tweaty.payment.presentation.dto.request.PaymentRequestDto;
 import com.tweaty.payment.presentation.dto.request.RefundRequestDto;
+import com.tweaty.payment.presentation.dto.response.CouponReadResponse;
 import com.tweaty.payment.presentation.dto.response.PaymentResponseDto;
 import com.tweaty.payment.presentation.dto.response.RefundResponseDto;
 
@@ -42,8 +44,9 @@ public class PaymentServiceImpl implements PaymentService {
 
 	private final RefundRepository refundRepository;
 
-	private final KafkaPaymentProducer kafkaPaymentProducer;
 	private final KafkaRefundProducer kafkaRefundProducer;
+
+	private final CouponClient couponClient;
 
 	@Override
 	@Transactional
@@ -55,29 +58,33 @@ public class PaymentServiceImpl implements PaymentService {
 
 		try {
 			// 2. 쿠폰이 있는 경우에 할인 적용
-			// TODO: coupon-service: 쿠폰아이디가 있으면 요청보내서 할인금액 받아오기 (실제금액,퍼센티지로 구분)
 			if (req.getCouponId() != null) {
-				// 정액(FIXED), 정률(RATE)
-				DiscountType discounyType = DiscountType.RATE;
-				int discountAmount = 10;
-				// TODO: 할인금액 계산하기 -> PaymentDomainService 에서 구현
-				int finalAmount = paymentDomainService.calculateDiscount(req.getOriginalAmount(), discountAmount,
-					discounyType);
-				payment.applyDiscount(discountAmount, finalAmount);
-
+				CouponReadResponse coupon = couponClient.getCouponTest(req.getCouponId());
+				int finalAmount = paymentDomainService.calculateDiscount(req.getOriginalAmount(),
+					coupon.discountAmount(),
+					coupon.discountType());
+				payment.applyDiscount(coupon.discountAmount(), finalAmount);
 			}
+
+			// if (req.getCouponId() != null) {
+			// 	// 정액(FIXED), 정률(RATE)
+			// 	DiscountType discounyType = DiscountType.RATE;
+			// 	int discountAmount = 10;
+			// 	// TODO: 할인금액 계산하기 -> PaymentDomainService 에서 구현
+			// 	int finalAmount = paymentDomainService.calculateDiscount(req.getOriginalAmount(), discountAmount,
+			// 		discounyType);
+			// 	payment.applyDiscount(discountAmount, finalAmount);
+			//
+			// }
 
 			// 3. 결제 성공 처리
 			payment.successPayment();
 			paymentRepository.save(payment);
 
-			// kafkaPaymentProducer.sendSuccessEvent(PaymentSuccessEvent.toDto(payment));
-
 		} catch (Exception e) {
-			log.error("결제실패 : {}", e.getMessage());
+			log.error("결제 실패 : {}", e.getMessage());
 			payment.failPayment();
 			paymentRepository.save(payment);
-			// kafkaPaymentProducer.sendFailedEvent(PaymentFailedEvent.toDto(payment));
 			throw new CustomException(ErrorCode.PAYMENT_FAIL, HttpStatus.BAD_REQUEST);
 		}
 		return payment.getId();

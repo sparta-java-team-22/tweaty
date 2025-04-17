@@ -8,10 +8,12 @@ import com.tweaty.payment.domain.entity.DiscountType;
 import com.tweaty.payment.domain.entity.Payment;
 import com.tweaty.payment.domain.repository.PaymentRepository;
 import com.tweaty.payment.domain.service.PaymentDomainService;
+import com.tweaty.payment.infrastucture.client.CouponClient;
 import com.tweaty.payment.infrastucture.kafka.event.PaymentCreateEvent;
 import com.tweaty.payment.infrastucture.kafka.event.PaymentFailedEvent;
 import com.tweaty.payment.infrastucture.kafka.event.PaymentSuccessEvent;
 import com.tweaty.payment.infrastucture.kafka.producer.KafkaPaymentProducer;
+import com.tweaty.payment.presentation.dto.response.CouponReadResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,7 @@ public class PaymentEventConsumer {
 	private final PaymentRepository paymentRepository;
 	private final PaymentDomainService paymentDomainService;
 	private final KafkaPaymentProducer kafkaPaymentProducer;
+	private final CouponClient couponClient;
 
 	@KafkaListener(topics = "payment-success", groupId = "payment-consumer")
 	public void consumePaymentSuccess(PaymentSuccessEvent event) {
@@ -41,7 +44,7 @@ public class PaymentEventConsumer {
 	@KafkaListener(topics = "payment-create", groupId = "payment-service")
 	@Transactional
 	public void handleCreatePayment(PaymentCreateEvent event) {
-		log.info("📥 결제 생성 이벤트 수신: {}", event);
+		log.info("결제 생성 이벤트 수신: {}", event);
 
 		Payment payment = Payment.toReadyEntity(event);
 		paymentDomainService.saveReadyPayment(payment);
@@ -49,21 +52,21 @@ public class PaymentEventConsumer {
 		try {
 			// TODO: 실제 할인 적용은 coupon-service 연동 필요 (지금은 mock)
 			if (event.getCouponId() != null) {
-				int discountAmount = 10; // 가상 데이터
-				DiscountType discountType = DiscountType.RATE;
+				CouponReadResponse coupon = couponClient.getCouponTest(event.getCouponId());
 				int finalAmount = paymentDomainService.calculateDiscount(
-					event.getOriginalAmount(), discountAmount, discountType
+					event.getOriginalAmount(), coupon.discountAmount(), coupon.discountType()
 				);
-				payment.applyDiscount(discountAmount, finalAmount);
+				payment.applyDiscount(coupon.discountAmount(), finalAmount);
 			}
 
 			payment.successPayment();
 			paymentRepository.save(payment);
+			log.info(" [Kafka 처리 완료] Payment 저장!");
 
 			kafkaPaymentProducer.sendSuccessEvent(PaymentSuccessEvent.toDto(payment));
 
 		} catch (Exception e) {
-			log.error("❌ 결제 처리 실패: {}", e.getMessage());
+			log.error(" 결제 실패: {}", e.getMessage());
 			payment.failPayment();
 			paymentRepository.save(payment);
 

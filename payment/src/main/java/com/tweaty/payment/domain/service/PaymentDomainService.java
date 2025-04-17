@@ -9,6 +9,7 @@ import com.tweaty.payment.domain.entity.Payment;
 import com.tweaty.payment.domain.entity.Refund;
 import com.tweaty.payment.domain.repository.PaymentRepository;
 import com.tweaty.payment.domain.repository.RefundRepository;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -20,18 +21,18 @@ public class PaymentDomainService {
 
 	public int calculateDiscount(int originalAmount, int discountAmount, DiscountType discountType) {
 		// TODO: 할인로직 짜기
-		int finalAmount = 0;
+		int finalAmount = originalAmount;
 		if (discountType == DiscountType.FIXED) {
-			finalAmount = originalAmount - discountAmount;
+			finalAmount -= discountAmount;
 		} else if (discountType == DiscountType.RATE) {
-			finalAmount = originalAmount - (originalAmount * discountAmount / 100);
+			finalAmount -= (originalAmount * discountAmount / 100);
+		} else if (discountType == DiscountType.NONE) {
 		} else {
 			throw new IllegalArgumentException("잘못된 할인 타입입니다.");
 		}
 
 		return Math.max(finalAmount, 0);
 	}
-
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void saveReadyPayment(Payment payment) {
