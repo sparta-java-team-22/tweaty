@@ -27,11 +27,11 @@ public class ReservationSchedule extends BaseEntity {
 	@Column(name = "store_id", nullable = false)
 	private UUID storeId;
 
-	@Column(name = "table_count", nullable = false)
-	private int tableCount;
+	@Column(name = "reservation_table_two_count", nullable = false)
+	private int reservationTableTwoCount;
 
-	@Column(name = "reservation_table_count", nullable = false)
-	private int reservationTableCount;
+	@Column(name = "reservation_table_four_count", nullable = false)
+	private int reservationTableFourCount;
 
 	@Column(name = "reservation_time", nullable = false)
 	private String reservationTime;
@@ -50,8 +50,8 @@ public class ReservationSchedule extends BaseEntity {
 
 	public ReservationSchedule(ReservationScheduleRequestDto reservationScheduleRequestDto) {
 		this.storeId = reservationScheduleRequestDto.getStoreId();
-		this.tableCount = reservationScheduleRequestDto.getTableCount();
-		this.reservationTableCount = reservationScheduleRequestDto.getReservationTableCount();
+		this.reservationTableTwoCount = 0;
+		this.reservationTableFourCount = 0;
 		this.reservationTime = reservationScheduleRequestDto.getReservationTime();
 		this.reservationDate = reservationScheduleRequestDto.getReservationDate();
 		this.currentCapacity = reservationScheduleRequestDto.getCurrentCapacity();
@@ -61,12 +61,29 @@ public class ReservationSchedule extends BaseEntity {
 
 	public void update(ReservationScheduleRequestDto requestDto) {
 		this.storeId = requestDto.getStoreId();
-		this.tableCount = requestDto.getTableCount();
-		this.reservationTableCount = requestDto.getReservationTableCount();
 		this.reservationTime = requestDto.getReservationTime();
 		this.reservationDate = requestDto.getReservationDate();
 		this.currentCapacity = requestDto.getCurrentCapacity();
 		this.tableTwo = requestDto.getTableTwo();
 		this.tableFour = requestDto.getTableFour();
+	}
+
+	public int getMaxGuestCount() {
+		return (tableTwo * 2) + (tableFour * 4);
+	}
+
+	public void updateTakenCount(int guestCount) {
+
+		while (guestCount > 0) {
+			if (guestCount / 4 > 0 && tableFour > reservationTableFourCount) {
+				guestCount -= 4;
+				reservationTableFourCount++;
+			} else if (tableTwo > reservationTableTwoCount) {
+				guestCount -= 2;
+				reservationTableTwoCount++;
+			} else {
+				throw new IllegalArgumentException("예약할 수 있는 테이블이 없습니다.");
+			}
+		}
 	}
 }

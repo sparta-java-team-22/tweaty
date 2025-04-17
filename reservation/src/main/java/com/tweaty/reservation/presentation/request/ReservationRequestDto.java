@@ -8,6 +8,7 @@ import lombok.Getter;
 public class ReservationRequestDto {
 
 	private UUID storeId;
+	private UUID reservationScheduleId;
 	private int guestCount;
 
 }

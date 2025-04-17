@@ -2,6 +2,8 @@ package com.tweaty.reservation.domain.model;
 
 import java.util.UUID;
 
+import com.tweaty.reservation.presentation.request.ReservationRequestDto;
+
 import base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,4 +37,10 @@ public class Reservation extends BaseEntity {
 	@Column(name = "status", nullable = false)
 	private ReservationStatus status;
 
+	public Reservation(ReservationRequestDto requestDto) {
+		this.storeId = requestDto.getStoreId();
+		this.userId = null;
+		this.guestCount = requestDto.getGuestCount();
+		this.status = ReservationStatus.COMPLETED;
+	}
 }
