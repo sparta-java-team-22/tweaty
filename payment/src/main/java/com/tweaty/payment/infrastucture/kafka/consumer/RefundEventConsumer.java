@@ -56,7 +56,7 @@ public class RefundEventConsumer {
 		log.info("환불 생성 이벤트 수신: {}", event);
 
 		Payment payment = paymentDomainService.findPayment(event.getPaymentId());
-		Refund refund = paymentDomainService.findRefund(event.getRefundId());
+		Refund refund = paymentDomainService.findRefund(event.getRefundId(),event.getUserId());
 
 
 		try {

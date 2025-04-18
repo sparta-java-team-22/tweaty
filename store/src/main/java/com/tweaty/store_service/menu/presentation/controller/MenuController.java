@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,25 +32,28 @@ public class MenuController {
 	private final MenuService menuService;
 
 	@PostMapping("/{storeId}")
-	public ResponseEntity<?> createMenu(@RequestBody MenuRequestDto req, @PathVariable UUID storeId) {
+	public ResponseEntity<?> createMenu(@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role, @RequestBody MenuRequestDto req, @PathVariable UUID storeId) {
 
-		MenuIdDto menuIdDto = new MenuIdDto(menuService.createMenu(req, storeId));
+		MenuIdDto menuIdDto = new MenuIdDto(menuService.createMenu(req, storeId,userId, role));
 
 		return SuccessResponse.successWith(200, "메뉴 생성 성공", menuIdDto);
 
 	}
 
 	@PatchMapping("/{menuId}")
-	public ResponseEntity<?> updateMenu(@RequestBody MenuRequestDto req, @PathVariable UUID menuId) {
+	public ResponseEntity<?> updateMenu(@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role, @RequestBody MenuRequestDto req, @PathVariable UUID menuId) {
 
-		menuService.updateMenu(req, menuId);
+		menuService.updateMenu(req, menuId, userId, role);
 		return SuccessResponse.successMessageOnly("메뉴 수정 성공");
 	}
 
 	@DeleteMapping("/{menuId}")
-	public ResponseEntity<?> deleteMenu(@PathVariable UUID menuId) {
+	public ResponseEntity<?> deleteMenu(@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role, @PathVariable UUID menuId) {
 
-		menuService.deleteMenu(menuId);
+		menuService.deleteMenu(menuId, userId, role);
 		return SuccessResponse.successMessageOnly("메뉴 삭제 성공");
 	}
 
@@ -57,10 +61,9 @@ public class MenuController {
 	public ResponseEntity<?> getMenuList(@PathVariable UUID storeId, @RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size) {
 
-		Page<MenuResponseDto> menuPage = menuService.getMenuList(page,size,storeId);
+		Page<MenuResponseDto> menuPage = menuService.getMenuList(page, size, storeId);
 
 		return SuccessResponse.successWith(200, "메뉴 전체조회 성공.", MenuListResponse.from(menuPage));
 	}
-
 
 }

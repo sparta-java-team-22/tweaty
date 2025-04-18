@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,10 +49,9 @@ public class PaymentController {
 	private final PaymentDomainService paymentDomainService;
 
 	@PostMapping("/{reservationId}")
-	public ResponseEntity<?> createPayment(@RequestBody PaymentRequestDto req, @PathVariable UUID reservationId) {
-
-		// TODO: 유저아이디 헤더 추가
-		UUID userId = UUID.fromString("d263308c-5bf0-4362-9c51-a4c42c123456");
+	public ResponseEntity<?> createPayment(@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role, @RequestBody PaymentRequestDto req,
+		@PathVariable UUID reservationId) {
 
 		// 결제 객체 생성(결제요청 상태)
 		Payment payment = Payment.toReadyEntity(req, reservationId, userId);
@@ -63,10 +63,9 @@ public class PaymentController {
 	}
 
 	@PostMapping("/{reservationId}/kafka")
-	public ResponseEntity<?> createKafkaPayment(@RequestBody PaymentRequestDto req, @PathVariable UUID reservationId) {
-
-		// TODO: 유저아이디 헤더 추가
-		UUID userId = UUID.fromString("d263308c-5bf0-4362-9c51-a4c42c123456");
+	public ResponseEntity<?> createKafkaPayment(@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role, @RequestBody PaymentRequestDto req,
+		@PathVariable UUID reservationId) {
 
 		// 결제 객체 생성(결제요청 상태)
 		Payment payment = Payment.toReadyEntity(req, reservationId, userId);
@@ -79,11 +78,9 @@ public class PaymentController {
 	}
 
 	@GetMapping
-	public ResponseEntity<?> getPaymentList(@RequestParam(defaultValue = "0") int page,
+	public ResponseEntity<?> getPaymentList(@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role, @RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size) {
-
-		// TODO: 유저아이디 헤더 추가
-		UUID userId = UUID.fromString("d263308c-5bf0-4362-9c51-a4c42c123456");
 
 		Page<PaymentResponseDto> paymentPage = paymentService.getPayment(userId, page, size);
 
@@ -91,10 +88,8 @@ public class PaymentController {
 	}
 
 	@PostMapping("/{paymentId}/refund")
-	public ResponseEntity<?> createKafkaRefund(@RequestBody RefundRequestDto req, @PathVariable UUID paymentId) {
-
-		// TODO: 유저아이디 헤더 추가
-		UUID userId = UUID.fromString("d263308c-5bf0-4362-9c51-a4c42c123456");
+	public ResponseEntity<?> createKafkaRefund(@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role, @RequestBody RefundRequestDto req, @PathVariable UUID paymentId) {
 
 		RefundIdDto refundIdDto = new RefundIdDto(paymentService.createRefund(req, userId, paymentId));
 
@@ -102,10 +97,8 @@ public class PaymentController {
 	}
 
 	@PostMapping("/{paymentId}/refund/kafka")
-	public ResponseEntity<?> createRefund(@RequestBody RefundRequestDto req, @PathVariable UUID paymentId) {
-
-		// TODO: 유저아이디 헤더 추가
-		UUID userId = UUID.fromString("d263308c-5bf0-4362-9c51-a4c42c123456");
+	public ResponseEntity<?> createRefund(@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role, @RequestBody RefundRequestDto req, @PathVariable UUID paymentId) {
 
 		Payment payment = paymentDomainService.findPayment(paymentId);
 
@@ -120,11 +113,9 @@ public class PaymentController {
 	}
 
 	@GetMapping("/refund")
-	public ResponseEntity<?> getRefundList(@RequestParam(defaultValue = "0") int page,
+	public ResponseEntity<?> getRefundList(@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role, @RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size) {
-
-		// TODO: 유저아이디 헤더 추가
-		UUID userId = UUID.fromString("d263308c-5bf0-4362-9c51-a4c42c123456");
 
 		Page<RefundResponseDto> refundPage = paymentService.getRefund(userId, page, size);
 

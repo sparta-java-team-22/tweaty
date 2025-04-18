@@ -1,6 +1,7 @@
 package com.tweaty.store_service.store.presentation.controller;
 
 import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,42 +33,34 @@ public class StoreController {
 	private final StoreService storeService;
 
 	@PostMapping
-	public ResponseEntity<?> createStore(@RequestBody StoreRequestDto req) {
+	public ResponseEntity<?> createStore(@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role, @RequestBody StoreRequestDto req) {
 
-		// TODO: 유저아이디 받아오기
-		UUID userId = UUID.randomUUID();
-
-		StoreIdDto storeIdDto = new StoreIdDto(storeService.createStore(req, userId));
-		return SuccessResponse.successWith(200, "식당 생성 성공.",storeIdDto);
+		StoreIdDto storeIdDto = new StoreIdDto(storeService.createStore(req, userId, role));
+		return SuccessResponse.successWith(200, "식당 생성 성공.", storeIdDto);
 	}
 
 	@PatchMapping("/{storeId}")
-	public ResponseEntity<?> updateStore(@RequestBody StoreRequestDto req, @PathVariable UUID storeId) {
+	public ResponseEntity<?> updateStore(@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role, @RequestBody StoreRequestDto req, @PathVariable UUID storeId) {
 
-		// TODO: 유저아이디 받아오기
-		UUID userId = UUID.randomUUID();
-
-		storeService.updateStore(req, storeId);
+		storeService.updateStore(req, storeId,userId,role);
 
 		return SuccessResponse.successMessageOnly("식당 수정 성공");
 	}
 
 	@DeleteMapping("/{storeId}")
-	public ResponseEntity<?> deleteStore(@PathVariable UUID storeId) {
+	public ResponseEntity<?> deleteStore(@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role, @PathVariable UUID storeId) {
 
-		// TODO: 유저아이디 받아오기
-		UUID userId = UUID.randomUUID();
-
-		storeService.deleteStore(storeId);
+		storeService.deleteStore(storeId,userId,role);
 
 		return SuccessResponse.successMessageOnly("식당 삭제 성공");
 	}
 
-
 	// TODO: 예약서비스에서 요청으로 사용
 	@GetMapping("/{storeId}")
-	public StoreResponseDto getStore(@PathVariable UUID storeId) {
-
+	public StoreResponseDto getStore( @PathVariable UUID storeId) {
 		return storeService.getStore(storeId);
 	}
 
@@ -74,9 +68,6 @@ public class StoreController {
 	public ResponseEntity<?> getStoreList(
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size) {
-
-		// TODO: 유저아이디 받아오기
-		UUID userId = UUID.randomUUID();
 
 		Page<StoreResponseDto> storePage = storeService.getStoreList(page, size);
 
@@ -92,26 +83,21 @@ public class StoreController {
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size) {
 
-		// TODO: 유저아이디 받아오기
-		UUID userId = UUID.randomUUID();
 
 		Page<StoreResponseDto> storePage = storeService.searchStoreList(name, isReservation, isWaiting, page, size);
 
 		return SuccessResponse.successWith(200, "식당 검색 성공.", StoreListResponse.from(storePage));
 	}
 
-
-	// TODO: 추후 유저아이디 헤더에 넣기
-	@GetMapping("/owner/{userId}")
-	public ResponseEntity<?> getStoreListByOwner(
+	@GetMapping("/owner")
+	public ResponseEntity<?> getStoreListByOwner(@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role,
 		@RequestParam(defaultValue = "0") int page,
-		@RequestParam(defaultValue = "10") int size,@PathVariable UUID userId) {
+		@RequestParam(defaultValue = "10") int size) {
 
-
-		Page<StoreResponseDto> storePage = storeService.getStoreListByOwner(page, size,userId);
+		Page<StoreResponseDto> storePage = storeService.getStoreListByOwner(page, size, userId);
 
 		return SuccessResponse.successWith(200, "식당 조회 성공.", StoreListResponse.from(storePage));
 	}
-
 
 }

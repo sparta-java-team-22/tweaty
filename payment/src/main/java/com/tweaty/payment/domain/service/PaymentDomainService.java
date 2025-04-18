@@ -62,9 +62,14 @@ public class PaymentDomainService {
 		return payment;
 	}
 
-	public Refund findRefund(UUID refundId) {
+	public Refund findRefund(UUID refundId,UUID userId) {
 		Refund refund = refundRepository.findById(refundId)
 			.orElseThrow(() -> new CustomException(ErrorCode.REFUND_NOT_FOUND, HttpStatus.NOT_FOUND));
+
+		if(userId != refund.getUserId()) {
+			throw new CustomException(ErrorCode.USER_FORBIDDEN,HttpStatus.FORBIDDEN);
+
+		}
 
 		if (refund.getStatus() != RefundType.READY) {
 			throw new CustomException(ErrorCode.REFUND_ALREADY_USED, HttpStatus.BAD_REQUEST);

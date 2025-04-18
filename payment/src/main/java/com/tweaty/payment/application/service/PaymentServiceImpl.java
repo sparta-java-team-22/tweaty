@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tweaty.payment.domain.entity.DiscountType;
 import com.tweaty.payment.domain.entity.Payment;
 import com.tweaty.payment.domain.entity.PaymentType;
 import com.tweaty.payment.domain.entity.Refund;
@@ -19,8 +18,6 @@ import com.tweaty.payment.domain.repository.RefundRepository;
 import com.tweaty.payment.domain.service.PaymentDomainService;
 import com.tweaty.payment.global.exception.CustomException;
 import com.tweaty.payment.infrastucture.client.CouponClient;
-
-import com.tweaty.payment.infrastucture.kafka.producer.KafkaRefundProducer;
 
 import com.tweaty.payment.presentation.dto.request.RefundRequestDto;
 import com.tweaty.payment.presentation.dto.response.CouponReadResponse;
@@ -47,32 +44,18 @@ public class PaymentServiceImpl implements PaymentService {
 	@Transactional
 	public UUID createPayment(Payment payment) {
 
-		// // 1. 결제 객체 생성(결제요청 상태)
-		// Payment payment = Payment.toReadyEntity(req, reservationId, userId);
-		// paymentDomainService.saveReadyPayment(payment);
-
 		try {
-			// 2. 쿠폰이 있는 경우에 할인 적용
+			// 쿠폰이 있는 경우에 할인 적용
 			if (payment.getCouponId() != null) {
-				CouponReadResponse coupon = couponClient.getCouponTest(payment.getCouponId());
+				CouponReadResponse coupon = couponClient.getCoupon(payment.getCouponId());
 				int finalAmount = paymentDomainService.calculateDiscount(payment.getOriginalAmount(),
 					coupon.discountAmount(),
 					coupon.discountType());
 				payment.applyDiscount(coupon.discountAmount(), finalAmount);
 			}
 
-			// if (req.getCouponId() != null) {
-			// 	// 정액(FIXED), 정률(RATE)
-			// 	DiscountType discounyType = DiscountType.RATE;
-			// 	int discountAmount = 10;
-			// 	// TODO: 할인금액 계산하기 -> PaymentDomainService 에서 구현
-			// 	int finalAmount = paymentDomainService.calculateDiscount(req.getOriginalAmount(), discountAmount,
-			// 		discounyType);
-			// 	payment.applyDiscount(discountAmount, finalAmount);
-			//
-			// }
 
-			// 3. 결제 성공 처리
+			// 결제 성공 처리
 			payment.successPayment();
 			paymentRepository.save(payment);
 
