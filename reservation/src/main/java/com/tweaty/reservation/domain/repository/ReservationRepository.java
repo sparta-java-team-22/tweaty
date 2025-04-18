@@ -7,9 +7,9 @@ import java.util.UUID;
 import com.tweaty.reservation.domain.model.Reservation;
 
 public interface ReservationRepository {
-	void save(Reservation reservation);
-
-	List<Reservation> findAll();
+	Reservation save(Reservation reservation);
 
 	Optional<Reservation> findByIdAndIsDeletedFalse(UUID reservationId);
+
+	List<Reservation> findByUserId(UUID userId);
 }
