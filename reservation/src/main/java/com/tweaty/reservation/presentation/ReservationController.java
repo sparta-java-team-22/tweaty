@@ -39,4 +39,9 @@ public class ReservationController {
 		return ResponseEntity.status(HttpStatus.OK).body(reservation);
 	}
 
+	@GetMapping
+	public ResponseEntity<?> getAllReservations(@RequestHeader("X-USER-ID") UUID userId) {
+		return ResponseEntity.status(HttpStatus.OK).body(reservationService.getAllReservations(userId));
+	}
+
 }

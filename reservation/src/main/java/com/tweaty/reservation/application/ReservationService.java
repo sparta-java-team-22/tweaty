@@ -1,5 +1,6 @@
 package com.tweaty.reservation.application;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -52,5 +53,11 @@ public class ReservationService {
 			.orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
 
 		return ReservationResponseDto.from(reservation);
+	}
+
+	public List<ReservationResponseDto> getAllReservations(UUID userId) {
+		List<Reservation> reservations = reservationRepository.findByUserId(userId);
+
+		return ReservationResponseDto.froms(reservations);
 	}
 }

@@ -1,5 +1,7 @@
 package com.tweaty.reservation.application.dto;
 
+import java.util.List;
+
 import com.tweaty.reservation.domain.model.Reservation;
 import com.tweaty.reservation.domain.model.ReservationStatus;
 
@@ -23,5 +25,9 @@ public class ReservationResponseDto {
 		responseDto.reservationDate = reservation.getCreatedAt().toString();
 
 		return responseDto;
+	}
+
+	public static List<ReservationResponseDto> froms(List<Reservation> reservations) {
+		return reservations.stream().map(ReservationResponseDto::from).toList();
 	}
 }
