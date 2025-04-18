@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tweaty.promotion.application.PromotionService;
 import com.tweaty.promotion.application.dto.PromotionCreateResponse;
 import com.tweaty.promotion.application.dto.PromotionReadResponse;
+import com.tweaty.promotion.application.dto.PromotionTimeAttackCouponResponse;
 import com.tweaty.promotion.presentation.request.PromotionCreateRequest;
 
 import lombok.RequiredArgsConstructor;
@@ -41,5 +42,12 @@ public class PromotionController {
 	public ResponseEntity<Void> updateEventStatusToEnded(@PathVariable UUID eventId) {
 		promotionService.updateEventStatusToEnded(eventId);
 		return ResponseEntity.noContent().build();
+	}
+
+	@PostMapping("/{eventId}/issue")
+	public ResponseEntity<PromotionTimeAttackCouponResponse> issueTimeAttackCoupon(@PathVariable UUID eventId) {
+		UUID customerId = UUID.randomUUID();
+		PromotionTimeAttackCouponResponse response = promotionService.issueTimeAttackCoupon(eventId);
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 }
