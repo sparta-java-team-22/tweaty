@@ -4,7 +4,7 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://tweaty-db:5432/${DB_NAME}
+    url: jdbc:postgresql://db:5432/${DB_NAME}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
 
