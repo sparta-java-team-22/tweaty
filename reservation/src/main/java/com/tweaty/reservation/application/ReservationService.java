@@ -62,7 +62,7 @@ public class ReservationService {
 	}
 
 	@Transactional
-	public void updateReservation(UUID reservationId, ReservationRequestDto requestDto) {
+	public void updateReservation(UUID reservationId, ReservationRequestDto requestDto, UUID userId, String role) {
 		Reservation reservation = reservationRepository.findByIdAndIsDeletedFalse(reservationId)
 			.orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
 		ReservationSchedule reservationSchedule = reservationScheduleRepository.findByIdAndIsDeletedFalse(
@@ -80,9 +80,30 @@ public class ReservationService {
 		if (requestDto.getGuestCount() > 10) {
 			throw new IllegalArgumentException("손님 수는 최대 10명까지 가능합니다.");
 		}
+		if (reservation.getUserId() != userId || role.equals("ADMIN")) {
+			throw new IllegalArgumentException("예약을 수정할 권한이 없습니다.");
+		}
 
 		reservationSchedule.updateTakenCount(requestDto.getGuestCount(), reservation.getGuestCount());
 		reservation.update(requestDto);
 		reservationRepository.save(reservation);
+	}
+
+	@Transactional
+	public void deleteReservation(UUID reservationId, UUID userId, String role) {
+		Reservation reservation = reservationRepository.findByIdAndIsDeletedFalse(reservationId)
+			.orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
+
+		ReservationSchedule reservationSchedule = reservationScheduleRepository.findByIdAndIsDeletedFalse(
+				reservation.getReservationScheduleId())
+			.orElseThrow(() -> new IllegalArgumentException("예약 일정을 찾을 수 없습니다."));
+
+		if (reservation.getUserId() != userId || role.equals("ADMIN")) {
+			throw new IllegalArgumentException("예약을 취소할 권한이 없습니다.");
+		}
+
+		reservationSchedule.updateDeleteTakenCount(reservation.getGuestCount());
+		reservation.softDelete();
+
 	}
 }

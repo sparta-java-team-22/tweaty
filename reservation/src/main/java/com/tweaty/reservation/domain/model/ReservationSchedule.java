@@ -106,4 +106,16 @@ public class ReservationSchedule extends BaseEntity {
 			}
 		}
 	}
+
+	public void updateDeleteTakenCount(int guestCount) {
+		while (guestCount > 0) {
+			if (reservationTableFourCount > 0) {
+				reservationTableFourCount--;
+				guestCount -= 4;
+			} else if (reservationTableTwoCount > 0) {
+				reservationTableTwoCount--;
+				guestCount -= 2;
+			}
+		}
+	}
 }

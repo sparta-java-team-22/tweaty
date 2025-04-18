@@ -25,6 +25,9 @@ public class Reservation extends BaseEntity {
 	@Column(name = "id", updatable = false, nullable = false)
 	private UUID id;
 
+	@Column(name = "reservation_schedule_id", nullable = false)
+	private UUID reservationScheduleId;
+
 	@Column(name = "store_id", nullable = false)
 	private UUID storeId;
 
@@ -39,6 +42,7 @@ public class Reservation extends BaseEntity {
 
 	public Reservation(ReservationRequestDto requestDto, UUID userId) {
 		this.storeId = requestDto.getStoreId();
+		this.reservationScheduleId = requestDto.getReservationScheduleId();
 		this.userId = userId;
 		this.guestCount = requestDto.getGuestCount();
 		this.status = ReservationStatus.COMPLETED;

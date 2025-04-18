@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,8 +48,17 @@ public class ReservationController {
 
 	@PatchMapping("/{reservationId}")
 	public ResponseEntity<?> updateReservation(@PathVariable UUID reservationId,
-		@RequestBody ReservationRequestDto requestDto) {
-		reservationService.updateReservation(reservationId, requestDto);
+		@RequestBody ReservationRequestDto requestDto, @RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role) {
+		reservationService.updateReservation(reservationId, requestDto, userId, role);
 		return ResponseEntity.status(HttpStatus.OK).body("예약이 수정되었습니다.");
+	}
+
+	@DeleteMapping("/{reservationId}")
+	public ResponseEntity<?> deleteReservation(@PathVariable UUID reservationId,
+		@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role) {
+		reservationService.deleteReservation(reservationId, userId, role);
+		return ResponseEntity.status(HttpStatus.OK).body("예약이 취소되었습니다.");
 	}
 }
