@@ -86,4 +86,24 @@ public class ReservationSchedule extends BaseEntity {
 			}
 		}
 	}
+
+	public void updateTakenCount(int guestCount, int previousGuestCount) {
+		int difference = guestCount - previousGuestCount;
+
+		if (difference > 0) {
+			updateTakenCount(difference);
+		} else {
+			while (difference < 0) {
+				if (reservationTableFourCount > 0) {
+					reservationTableFourCount--;
+					difference += 4;
+				} else if (reservationTableTwoCount > 0) {
+					reservationTableTwoCount--;
+					difference += 2;
+				} else {
+					throw new IllegalArgumentException("예약할 수 있는 테이블이 없습니다.");
+				}
+			}
+		}
+	}
 }

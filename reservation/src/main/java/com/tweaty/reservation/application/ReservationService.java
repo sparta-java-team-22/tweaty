@@ -60,4 +60,29 @@ public class ReservationService {
 
 		return ReservationResponseDto.froms(reservations);
 	}
+
+	@Transactional
+	public void updateReservation(UUID reservationId, ReservationRequestDto requestDto) {
+		Reservation reservation = reservationRepository.findByIdAndIsDeletedFalse(reservationId)
+			.orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
+		ReservationSchedule reservationSchedule = reservationScheduleRepository.findByIdAndIsDeletedFalse(
+			requestDto.getReservationScheduleId()).orElseThrow(() -> new IllegalArgumentException("예약 일정을 찾을 수 없습니다."));
+
+		if (requestDto.getGuestCount() <= 0) {
+			throw new IllegalArgumentException("손님 수는 1명 이상이어야 합니다.");
+		}
+		if (requestDto.getStoreId() == null) {
+			throw new IllegalArgumentException("가게 ID는 필수입니다.");
+		}
+		if (requestDto.getReservationScheduleId() == null) {
+			throw new IllegalArgumentException("예약 일정 ID는 필수입니다.");
+		}
+		if (requestDto.getGuestCount() > 10) {
+			throw new IllegalArgumentException("손님 수는 최대 10명까지 가능합니다.");
+		}
+
+		reservationSchedule.updateTakenCount(requestDto.getGuestCount(), reservation.getGuestCount());
+		reservation.update(requestDto);
+		reservationRepository.save(reservation);
+	}
 }

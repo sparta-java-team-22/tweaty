@@ -43,4 +43,8 @@ public class Reservation extends BaseEntity {
 		this.guestCount = requestDto.getGuestCount();
 		this.status = ReservationStatus.COMPLETED;
 	}
+
+	public void update(ReservationRequestDto requestDto) {
+		this.guestCount = requestDto.getGuestCount();
+	}
 }
