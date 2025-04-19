@@ -26,10 +26,9 @@ public class PaymentRequestDto {
 
 
 
-	@Builder
-	public Payment toEntity(UUID storeId,int discountAmount, int finalAmount) {
+	public Payment toEntity(UUID reservationId,int discountAmount, int finalAmount) {
 		return Payment.builder()
-			.storeId(storeId)
+			.reservationId(reservationId)
 			.couponId(this.couponId)
 			.originalAmount(this.originalAmount)
 			.discountAmount(discountAmount)

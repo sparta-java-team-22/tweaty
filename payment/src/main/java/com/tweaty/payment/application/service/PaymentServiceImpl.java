@@ -18,8 +18,12 @@ import com.tweaty.payment.domain.repository.PaymentRepository;
 import com.tweaty.payment.domain.repository.RefundRepository;
 import com.tweaty.payment.domain.service.PaymentDomainService;
 import com.tweaty.payment.global.exception.CustomException;
-import com.tweaty.payment.presentation.dto.request.PaymentRequestDto;
+import com.tweaty.payment.infrastucture.client.CouponClient;
+
+import com.tweaty.payment.infrastucture.kafka.producer.KafkaRefundProducer;
+
 import com.tweaty.payment.presentation.dto.request.RefundRequestDto;
+import com.tweaty.payment.presentation.dto.response.CouponReadResponse;
 import com.tweaty.payment.presentation.dto.response.PaymentResponseDto;
 import com.tweaty.payment.presentation.dto.response.RefundResponseDto;
 
@@ -37,34 +41,43 @@ public class PaymentServiceImpl implements PaymentService {
 
 	private final RefundRepository refundRepository;
 
+	private final CouponClient couponClient;
+
 	@Override
 	@Transactional
-	public UUID createPayment(PaymentRequestDto req, UUID userId, UUID storeId) {
+	public UUID createPayment(Payment payment) {
 
-		// 1. 결제 객체 생성(결제요청 상태)
-		Payment payment = Payment.toReadyEntity(req, storeId, userId);
-		paymentDomainService.saveReadyPayment(payment);
+		// // 1. 결제 객체 생성(결제요청 상태)
+		// Payment payment = Payment.toReadyEntity(req, reservationId, userId);
+		// paymentDomainService.saveReadyPayment(payment);
 
 		try {
 			// 2. 쿠폰이 있는 경우에 할인 적용
-			// TODO: coupon-service: 쿠폰아이디가 있으면 요청보내서 할인금액 받아오기 (실제금액,퍼센티지로 구분)
-			if (req.getCouponId() != null) {
-				// 정액(FIXED), 정률(RATE)
-				DiscountType discounyType = DiscountType.RATE;
-				int discountAmount = 10;
-				// TODO: 할인금액 계산하기 -> PaymentDomainService 에서 구현
-				int finalAmount = paymentDomainService.calculateDiscount(req.getOriginalAmount(), discountAmount,
-					discounyType);
-				payment.applyDiscount(discountAmount, finalAmount);
-
+			if (payment.getCouponId() != null) {
+				CouponReadResponse coupon = couponClient.getCouponTest(payment.getCouponId());
+				int finalAmount = paymentDomainService.calculateDiscount(payment.getOriginalAmount(),
+					coupon.discountAmount(),
+					coupon.discountType());
+				payment.applyDiscount(coupon.discountAmount(), finalAmount);
 			}
+
+			// if (req.getCouponId() != null) {
+			// 	// 정액(FIXED), 정률(RATE)
+			// 	DiscountType discounyType = DiscountType.RATE;
+			// 	int discountAmount = 10;
+			// 	// TODO: 할인금액 계산하기 -> PaymentDomainService 에서 구현
+			// 	int finalAmount = paymentDomainService.calculateDiscount(req.getOriginalAmount(), discountAmount,
+			// 		discounyType);
+			// 	payment.applyDiscount(discountAmount, finalAmount);
+			//
+			// }
 
 			// 3. 결제 성공 처리
 			payment.successPayment();
 			paymentRepository.save(payment);
 
 		} catch (Exception e) {
-			log.error("결제실패 : {}", e.getMessage());
+			log.error("결제 실패 : {}", e.getMessage());
 			payment.failPayment();
 			paymentRepository.save(payment);
 			throw new CustomException(ErrorCode.PAYMENT_FAIL, HttpStatus.BAD_REQUEST);
@@ -85,7 +98,7 @@ public class PaymentServiceImpl implements PaymentService {
 	@Transactional
 	public UUID createRefund(RefundRequestDto req, UUID userId, UUID paymentId) {
 		// 1. 환불 객체 생성(환불요청 상태)
-		Payment payment = findPayment(paymentId);
+		Payment payment = paymentDomainService.findPayment(paymentId);
 		Refund refund = Refund.toReadyEntity(req, userId, payment);
 		paymentDomainService.saveReadyRefund(refund);
 
@@ -98,6 +111,7 @@ public class PaymentServiceImpl implements PaymentService {
 			refund.successRefund();
 			payment.successRefund();
 			refundRepository.save(refund);
+
 		} catch (Exception e) {
 			log.error("환불 실패 : {}", e.getMessage());
 			refund.failRefund();
@@ -114,17 +128,6 @@ public class PaymentServiceImpl implements PaymentService {
 
 		return refundRepository.findByUserIdAndStatus(userId, RefundType.SUCCESS, pageable)
 			.map(RefundResponseDto::toDto);
-	}
-
-	private Payment findPayment(UUID paymentId) {
-		Payment payment = paymentRepository.findById(paymentId)
-			.orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND, HttpStatus.NOT_FOUND));
-
-		if (payment.getStatus() == PaymentType.REFUNDED) {
-			throw new CustomException(ErrorCode.REFUND_ALREADY_USED, HttpStatus.BAD_REQUEST);
-		}
-
-		return payment;
 	}
 
 }

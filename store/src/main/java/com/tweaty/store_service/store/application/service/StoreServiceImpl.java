@@ -74,7 +74,7 @@ public class StoreServiceImpl implements StoreService {
 	public Page<StoreResponseDto> getStoreListByOwner(int page, int size, UUID userId) {
 		Pageable pageable = PageRequest.of(page, size);
 
-		return storeRepository.findByUserIdAndIsDeletedIsFalse(userId,pageable).map(StoreResponseDto::toDto);
+		return storeRepository.findByUserIdAndIsDeletedIsFalse(userId, pageable).map(StoreResponseDto::toDto);
 	}
 
 	@Override

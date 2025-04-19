@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.UuidGenerator;
 
+import com.tweaty.payment.infrastucture.kafka.event.PaymentCreateEvent;
 import com.tweaty.payment.presentation.dto.request.PaymentRequestDto;
 
 import base.BaseEntity;
@@ -34,7 +35,7 @@ public class Payment extends BaseEntity {
 	@Column(nullable = false)
 	private UUID userId;
 	@Column(nullable = false)
-	private UUID storeId;
+	private UUID reservationId;
 	private UUID couponId;
 	@Column(nullable = false)
 	@ColumnDefault("0")
@@ -50,10 +51,10 @@ public class Payment extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	private MethodType method;
 
-	public static Payment toReadyEntity(PaymentRequestDto req, UUID storeId, UUID userId) {
+	public static Payment toReadyEntity(PaymentRequestDto req, UUID reservationId, UUID userId) {
 		return Payment.builder()
 			.userId(userId)
-			.storeId(storeId)
+			.reservationId(reservationId)
 			.couponId(req.getCouponId())
 			.originalAmount(req.getOriginalAmount())
 			.finalAmount(req.getOriginalAmount())
@@ -79,5 +80,27 @@ public class Payment extends BaseEntity {
 		this.status = PaymentType.REFUNDED;
 	}
 
+
+	public static Payment toReadyEntity(PaymentCreateEvent event) {
+		return Payment.builder()
+			.userId(event.getUserId())
+			.reservationId(event.getReservationId())
+			.originalAmount(event.getOriginalAmount())
+			.status(PaymentType.READY)
+			.method(MethodType.valueOf(event.getMethod()))
+			.couponId(event.getCouponId())
+			.build();
+	}
+
+	public static Payment toFailedEntity(PaymentCreateEvent event) {
+		return Payment.builder()
+			.userId(event.getUserId())
+			.reservationId(event.getReservationId())
+			.originalAmount(event.getOriginalAmount())
+			.status(PaymentType.FAIL)
+			.method(MethodType.valueOf(event.getMethod()))
+			.couponId(event.getCouponId())
+			.build();
+	}
 
 }
