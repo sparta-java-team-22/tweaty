@@ -20,9 +20,9 @@ import com.tweaty.store_service.menu.application.service.MenuService;
 import com.tweaty.store_service.menu.presentation.dto.requset.MenuRequestDto;
 import com.tweaty.store_service.menu.presentation.dto.response.MenuListResponse;
 import com.tweaty.store_service.menu.presentation.dto.response.MenuResponseDto;
-import com.tweaty.store_service.store.global.SuccessResponse;
 
 import lombok.RequiredArgsConstructor;
+import response.SuccessResponse;
 
 @RestController
 @RequestMapping("/api/v1/menu")

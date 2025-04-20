@@ -18,12 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tweaty.store_service.store.application.dto.StoreIdDto;
 import com.tweaty.store_service.store.application.service.StoreService;
 
-import com.tweaty.store_service.store.global.SuccessResponse;
 import com.tweaty.store_service.store.presentation.dto.request.StoreRequestDto;
 import com.tweaty.store_service.store.presentation.dto.response.StoreListResponse;
 import com.tweaty.store_service.store.presentation.dto.response.StoreResponseDto;
 
 import lombok.RequiredArgsConstructor;
+import response.SuccessResponse;
 
 @RestController
 @RequestMapping("/api/v1/stores")

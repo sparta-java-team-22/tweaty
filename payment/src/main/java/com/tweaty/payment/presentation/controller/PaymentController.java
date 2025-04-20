@@ -3,7 +3,6 @@ package com.tweaty.payment.presentation.controller;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,12 +17,9 @@ import com.tweaty.payment.application.dto.PaymentIdDto;
 import com.tweaty.payment.application.dto.RefundIdDto;
 import com.tweaty.payment.application.service.PaymentService;
 import com.tweaty.payment.domain.entity.Payment;
-import com.tweaty.payment.domain.entity.PaymentType;
 import com.tweaty.payment.domain.entity.Refund;
-import com.tweaty.payment.domain.repository.PaymentRepository;
 import com.tweaty.payment.domain.service.PaymentDomainService;
-import com.tweaty.payment.global.SuccessResponse;
-import com.tweaty.payment.global.exception.CustomException;
+
 import com.tweaty.payment.infrastucture.kafka.event.PaymentCreateEvent;
 import com.tweaty.payment.infrastucture.kafka.event.RefundCreateEvent;
 import com.tweaty.payment.infrastucture.kafka.producer.KafkaPaymentProducer;
@@ -37,6 +33,7 @@ import com.tweaty.payment.presentation.dto.response.RefundResponseDto;
 
 import exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import response.SuccessResponse;
 
 @RestController
 @RequestMapping("/api/v1/payment")
