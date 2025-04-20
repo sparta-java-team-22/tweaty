@@ -48,11 +48,10 @@ public class PaymentController {
 	private final KafkaRefundProducer kafkaRefundProducer;
 	private final PaymentDomainService paymentDomainService;
 
-	@PostMapping("/{reservationId}")
+	@PostMapping("/{reservationId}/synchronize")
 	public ResponseEntity<?> createPayment(@RequestHeader("X-USER-ID") UUID userId,
 		@RequestHeader("X-USER-ROLE") String role, @RequestBody PaymentRequestDto req,
 		@PathVariable UUID reservationId) {
-
 		// 결제 객체 생성(결제요청 상태)
 		Payment payment = Payment.toReadyEntity(req, reservationId, userId);
 		paymentDomainService.saveReadyPayment(payment);
@@ -62,19 +61,16 @@ public class PaymentController {
 		return SuccessResponse.successWith(200, "결제 생성 성공", paymentIdDto);
 	}
 
-	@PostMapping("/{reservationId}/kafka")
+	@PostMapping("/{reservationId}")
 	public ResponseEntity<?> createKafkaPayment(@RequestHeader("X-USER-ID") UUID userId,
 		@RequestHeader("X-USER-ROLE") String role, @RequestBody PaymentRequestDto req,
 		@PathVariable UUID reservationId) {
-
 		// 결제 객체 생성(결제요청 상태)
 		Payment payment = Payment.toReadyEntity(req, reservationId, userId);
 		paymentDomainService.saveReadyPayment(payment);
-
 		kafkaPaymentProducer.sendCreateEvent(PaymentCreateEvent.from(payment));
-
 		PaymentIdDto paymentIdDto = new PaymentIdDto(payment.getId());
-		return SuccessResponse.successWith(200, "결제 생성 성공(kafka)", paymentIdDto);
+		return ResponseEntity.ok("결제 성공");
 	}
 
 	@GetMapping
@@ -87,7 +83,7 @@ public class PaymentController {
 		return SuccessResponse.successWith(200, "결제 내역조회 성공", PaymentListResponse.from(paymentPage));
 	}
 
-	@PostMapping("/{paymentId}/refund")
+	@PostMapping("/{paymentId}/refund/synchronize")
 	public ResponseEntity<?> createKafkaRefund(@RequestHeader("X-USER-ID") UUID userId,
 		@RequestHeader("X-USER-ROLE") String role, @RequestBody RefundRequestDto req, @PathVariable UUID paymentId) {
 
@@ -96,7 +92,7 @@ public class PaymentController {
 		return SuccessResponse.successWith(200, "환불 생성 성공", refundIdDto);
 	}
 
-	@PostMapping("/{paymentId}/refund/kafka")
+	@PostMapping("/{paymentId}/refund")
 	public ResponseEntity<?> createRefund(@RequestHeader("X-USER-ID") UUID userId,
 		@RequestHeader("X-USER-ROLE") String role, @RequestBody RefundRequestDto req, @PathVariable UUID paymentId) {
 
@@ -109,7 +105,7 @@ public class PaymentController {
 
 		RefundIdDto refundIdDto = new RefundIdDto(refund.getId());
 
-		return SuccessResponse.successWith(200, "환불 생성 성공", refundIdDto);
+		return ResponseEntity.ok("환불 요청이 접수되었습니다.");
 	}
 
 	@GetMapping("/refund")

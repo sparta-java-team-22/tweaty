@@ -37,14 +37,14 @@ public class RefundEventConsumer {
 	private final KafkaRefundProducer kafkaRefundProducer;
 	private final CouponClient couponClient;
 
-	@KafkaListener(topics = "payment-success", groupId = "payment-consumer")
+	@KafkaListener(topics = "refund-success", groupId = "refund-consumer")
 	public void consumePaymentSuccess(PaymentSuccessEvent event) {
 		log.info("결제 성공 이벤트 수신: {}", event);
 
 		// 여기서 알림 전송, 포인트 적립 등 처리
 	}
 
-	@KafkaListener(topics = "payment-failed", groupId = "alert-service")
+	@KafkaListener(topics = "refund-failed", groupId = "alert-service")
 	public void consumePaymentFailed(PaymentFailedEvent event) {
 		log.warn("결제 실패 이벤트 수신: {}", event);
 		// 알림 전송, 로그 저장, 슬랙 메시지 발송 등 처리 가능
@@ -55,32 +55,40 @@ public class RefundEventConsumer {
 	public void handleRefundCreatePayment(RefundCreateEvent event) {
 		log.info("환불 생성 이벤트 수신: {}", event);
 
-		Payment payment = paymentDomainService.findPayment(event.getPaymentId());
-		Refund refund = paymentDomainService.findRefund(event.getRefundId(),event.getUserId());
-
+		Refund refund = null;
+		Payment payment = null;
 
 		try {
-			// TODO: 2. coupon-service: 쿠폰아이디가 있으면 요청보내서 사용가능하게 만들기
-			if (payment.getCouponId() != null) {
+			payment = paymentDomainService.findPayment(event.getPaymentId());
+			refund = paymentDomainService.findRefund(event.getRefundId(), event.getUserId());
 
+			if (payment.getCouponId() != null) {
+				// TODO: 쿠폰 복원 로직 (예: couponClient.restoreCoupon(...))
 			}
-			// 3. 환불 성공 처리
+
 			refund.successRefund();
 			payment.successRefund();
 			refundRepository.save(refund);
 			log.info(" [Kafka 처리 완료] Refund 저장");
 
 			kafkaRefundProducer.sendSuccessEvent(RefundSuccessEvent.toDto(refund));
-		} catch (Exception e) {
-			log.error("환불 실패 : {}", e.getMessage());
-			refund.failRefund();
-			refundRepository.save(refund);
-			kafkaRefundProducer.sendFailedEvent(RefundFailedEvent.toDto(refund));
 
+		} catch (Exception e) {
+			log.error("환불 실패: {}", e.getMessage());
+
+			// 실패 처리 보장
+			if (refund != null) {
+				refund.failRefund();
+				refundRepository.save(refund);
+
+				kafkaRefundProducer.sendFailedEvent(RefundFailedEvent.toDto(refund));
+			} else {
+				log.warn("Refund 객체 없음. 실패 상태 저장 및 이벤트 발행 불가");
+			}
+
+			// 예외 던져서 Kafka 재시도하게 할지 말지는 설정에 따라 결정됨
 			throw new CustomException(ErrorCode.REFUND_FAIL, HttpStatus.BAD_REQUEST);
 		}
-
-
 	}
 
 }

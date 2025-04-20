@@ -18,9 +18,11 @@ import com.tweaty.payment.global.exception.CustomException;
 
 import exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PaymentDomainService {
 
 	private final PaymentRepository paymentRepository;
@@ -62,13 +64,12 @@ public class PaymentDomainService {
 		return payment;
 	}
 
-	public Refund findRefund(UUID refundId,UUID userId) {
+	public Refund findRefund(UUID refundId, UUID userId) {
 		Refund refund = refundRepository.findById(refundId)
 			.orElseThrow(() -> new CustomException(ErrorCode.REFUND_NOT_FOUND, HttpStatus.NOT_FOUND));
 
-		if(userId != refund.getUserId()) {
-			throw new CustomException(ErrorCode.USER_FORBIDDEN,HttpStatus.FORBIDDEN);
-
+		if (!userId.equals(refund.getUserId())) {
+			throw new CustomException(ErrorCode.USER_FORBIDDEN, HttpStatus.FORBIDDEN);
 		}
 
 		if (refund.getStatus() != RefundType.READY) {

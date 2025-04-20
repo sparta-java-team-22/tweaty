@@ -29,8 +29,8 @@ public class KafkaRefundProducer {
 	}
 
 	public void sendFailedEvent(RefundFailedEvent event) {
-		kafkaRefundFailedTemplate.send("payment-failed", event);
-		log.info("PaymentFailedEvent sent to Kafka: {}", event);
+		log.info(" Kafka 발행: {}", event);
+		kafkaRefundFailedTemplate.send("refund-failed", event);
 	}
 
 
