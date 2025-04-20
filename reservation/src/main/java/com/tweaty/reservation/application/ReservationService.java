@@ -98,7 +98,7 @@ public class ReservationService {
 				reservation.getReservationScheduleId())
 			.orElseThrow(() -> new IllegalArgumentException("예약 일정을 찾을 수 없습니다."));
 
-		if (reservation.getUserId() != userId || role.equals("ADMIN")) {
+		if (!reservation.getUserId().equals(userId) || !role.equals("ADMIN")) {
 			throw new IllegalArgumentException("예약을 취소할 권한이 없습니다.");
 		}
 
