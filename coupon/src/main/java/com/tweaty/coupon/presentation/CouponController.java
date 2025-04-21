@@ -21,7 +21,6 @@ import com.tweaty.coupon.application.dto.CouponReadResponse;
 import com.tweaty.coupon.application.dto.CouponStatusUpdateResponse;
 import com.tweaty.coupon.application.dto.CouponUpdateResponse;
 import com.tweaty.coupon.presentation.request.CouponCreateRequest;
-import com.tweaty.coupon.presentation.request.CouponIssueRequest;
 import com.tweaty.coupon.presentation.request.CouponUpdateRequest;
 
 import constant.UserConstant;
@@ -48,10 +47,9 @@ public class CouponController {
 	@PostMapping("/{couponId}/issue")
 	public ResponseEntity<CouponIssueResponse> issueCoupon(
 		@PathVariable UUID couponId,
-		@RequestHeader(UserConstant.X_USER_ID) UUID customerId,
-		@RequestBody CouponIssueRequest request
+		@RequestHeader(UserConstant.X_USER_ID) UUID customerId
 	) {
-		CouponIssueResponse response = couponService.issueCoupon(couponId, customerId, request);
+		CouponIssueResponse response = couponService.issueCoupon(couponId, customerId);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
