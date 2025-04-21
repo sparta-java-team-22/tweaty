@@ -1,5 +1,7 @@
 package com.tweaty.auth.application.service;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -9,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.tweaty.auth.application.dto.LoginRequestDto;
 import com.tweaty.auth.application.dto.LoginResponseDto;
+import com.tweaty.auth.application.dto.NotificationRequestDto;
 import com.tweaty.auth.application.dto.OwnerCreateRequestDto;
 import com.tweaty.auth.application.dto.OwnerResponseDto;
 import com.tweaty.auth.application.dto.OwnerSignUpRequestDto;
@@ -17,10 +20,15 @@ import com.tweaty.auth.application.dto.UserCreateRequestDto;
 import com.tweaty.auth.application.dto.UserDto;
 import com.tweaty.auth.application.dto.UserResponseDto;
 import com.tweaty.auth.application.dto.UserSignUpRequestDto;
+import com.tweaty.auth.exception.InvalidPasswordException;
+import com.tweaty.auth.infrastructure.client.NotificationServiceClient;
 import com.tweaty.auth.infrastructure.client.S3Uploader;
 import com.tweaty.auth.infrastructure.client.UserServiceClient;
 import com.tweaty.auth.infrastructure.security.AuthTokenProvider;
 
+import domain.NotiChannel;
+import domain.NotiType;
+import domain.TargetType;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -29,6 +37,7 @@ public class AuthService {
 
 	private final PasswordEncoder passwordEncoder;
 	private final UserServiceClient userServiceClient;
+	private final NotificationServiceClient notificationServiceClient;
 	private final S3Uploader s3Uploader;
 	private final AuthTokenProvider tokenProvider;
 
@@ -40,7 +49,24 @@ public class AuthService {
 			encryptedPassword, requestDto.getName(), requestDto.getPhoneNumber(), requestDto.getEmail(),
 			requestDto.getRole());
 
-		return userServiceClient.userSignUp(userCreateRequestDto, "true");
+		UserResponseDto responseDto =  userServiceClient.userSignUp(userCreateRequestDto, "true");
+
+		UserDto user = userServiceClient.getUserByUsername(userCreateRequestDto.getUsername(), "true");
+
+		Set<NotiChannel> channels = new HashSet<>();
+		channels.add(NotiChannel.WEB);
+		channels.add(NotiChannel.EMAIL);
+
+		NotificationRequestDto notificationRequestDto = new NotificationRequestDto(
+			user.getId(),
+			TargetType.SIGNUP,
+			channels,
+			NotiType.SIGNUP_USER
+		);
+
+		notificationServiceClient.createSignupNotification(notificationRequestDto);
+
+		return responseDto;
 
 	}
 
@@ -55,7 +81,24 @@ public class AuthService {
 			encryptedPassword, requestDto.getName(), requestDto.getPhoneNumber(), requestDto.getEmail(),
 			requestDto.getRole(), requestDto.getBusinessNumber(), uploadedUrl);
 
-		return userServiceClient.ownerSignUp(ownerCreateRequestDto, "true");
+		OwnerResponseDto responseDto = userServiceClient.ownerSignUp(ownerCreateRequestDto, "true");
+
+		UserDto user = userServiceClient.getUserByUsername(ownerCreateRequestDto.getUsername(), "true");
+
+		Set<NotiChannel> channels = new HashSet<>();
+		channels.add(NotiChannel.WEB);
+		channels.add(NotiChannel.EMAIL);
+
+		NotificationRequestDto notificationRequestDto = new NotificationRequestDto(
+			user.getId(),
+			TargetType.SIGNUP,
+			channels,
+			NotiType.SIGNUP_OWNER
+		);
+
+		notificationServiceClient.createSignupNotification(notificationRequestDto);
+
+		return responseDto;
 
 	}
 
@@ -64,7 +107,7 @@ public class AuthService {
 		UserDto user = userServiceClient.getUserByUsername(requestDto.getUsername(), "true");
 
 		if (!BCrypt.checkpw(requestDto.getPassword(), user.getPassword())) {
-			throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+			throw new InvalidPasswordException();
 		}
 
 		UserResponseDto responseDto = new UserResponseDto(user);
@@ -81,7 +124,7 @@ public class AuthService {
 		UserDto user = userServiceClient.getUserByUsername(username, "true");
 
 		if (!BCrypt.checkpw(requestDto.getCurrentPassword(), user.getPassword())) {
-			throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+			throw new InvalidPasswordException();
 		}
 
 		String encodedNewPassword = passwordEncoder.encode(requestDto.getNewPassword());

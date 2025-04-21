@@ -21,10 +21,12 @@ import com.tweaty.user.application.dto.OwnerResponseDto;
 import com.tweaty.user.application.dto.UserCreateRequestDto;
 import com.tweaty.user.application.dto.UserDto;
 import com.tweaty.user.application.dto.UserInfoResponseDto;
+import com.tweaty.user.application.dto.UserMailDto;
 import com.tweaty.user.application.dto.UserResponseDto;
 import com.tweaty.user.application.dto.UserUpdateRequestDto;
 import com.tweaty.user.application.dto.UserUpdateResponseDto;
 import com.tweaty.user.application.service.UserService;
+import com.tweaty.user.exception.AccessDeniedException;
 import com.tweaty.user.presentation.common.ApiResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -45,7 +47,7 @@ public class UserController {
 			return userService.userSignUp(requestDto);
 		}
 
-		throw new IllegalArgumentException("잘못된 접근입니다.");
+		throw new AccessDeniedException();
 
 	}
 
@@ -58,7 +60,7 @@ public class UserController {
 			return userService.ownerSignUp(requestDto);
 		}
 
-		throw new IllegalArgumentException("잘못된 접근입니다.");
+		throw new AccessDeniedException();
 
 	}
 
@@ -70,7 +72,7 @@ public class UserController {
 			return userService.getUserByUsername(username);
 		}
 
-		throw new IllegalArgumentException("잘못된 접근입니다.");
+		throw new AccessDeniedException();
 
 	}
 
@@ -83,8 +85,10 @@ public class UserController {
 
 		if ("ROLE_OWNER".equals(role)) {
 			responseDto = userService.getOwnerInfo(id);
-		} else {
+		} else if ("ROLE_CUSTOMER".equals(role) || "ROLE_ADMIN".equals(role)) {
 			responseDto = userService.getCustomerInfo(id);
+		} else {
+			throw new AccessDeniedException();
 		}
 
 		ApiResponse<UserInfoResponseDto> response = ApiResponse.<UserInfoResponseDto>builder()
@@ -111,6 +115,7 @@ public class UserController {
 			.build();
 
 		return ResponseEntity.ok(response);
+
 	}
 
 	//비밀번호 수정
@@ -123,7 +128,7 @@ public class UserController {
 			return ResponseEntity.ok().build();
 		}
 
-		return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		throw new AccessDeniedException();
 
 	}
 
@@ -136,6 +141,18 @@ public class UserController {
 		ApiResponse<Void> response = ApiResponse.<Void>builder().code(200).message("회원 탈퇴 성공").build();
 
 		return ResponseEntity.ok(response);
+
+	}
+
+	@GetMapping("/internal/mail")
+	public UserMailDto getUserMail(@RequestParam("receiverId") UUID receiverId,
+		@RequestHeader("internal-request") String internalRequest) {
+
+		if ("true".equals(internalRequest)) {
+			return userService.getUserMail(receiverId);
+		}
+
+		throw new AccessDeniedException();
 
 	}
 }

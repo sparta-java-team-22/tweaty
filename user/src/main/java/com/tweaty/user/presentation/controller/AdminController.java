@@ -6,11 +6,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tweaty.user.application.dto.OwnerStatusChangeResponseDto;
 import com.tweaty.user.application.dto.PageInfo;
 import com.tweaty.user.application.dto.UserListDto;
 import com.tweaty.user.application.dto.UserListReponseDto;
@@ -110,4 +112,72 @@ public class AdminController {
 		return ResponseEntity.ok(response);
 
 	}
+
+	//승인 거절 가게 주인 사용자 목록
+	@GetMapping("/rejected-owners")
+	public ResponseEntity<ApiResponse<UserListReponseDto>> getRejectedOwnersList(
+		@RequestParam(value = "page", required = false, defaultValue = "1") int page,
+		@RequestParam(value = "limit", required = false, defaultValue = "10") int limit,
+		@RequestParam(value = "sortBy", required = false, defaultValue = "createdAt") String sortBy,
+		@RequestParam(value = "order", required = false, defaultValue = "asc") String order) {
+
+		Page<UserListDto> responseDtos = userService.getRejectedOwnersList(page - 1, limit, sortBy, order);
+
+		UserListReponseDto responseDto = UserListReponseDto.builder()
+			.users(responseDtos.getContent())
+			.pageInfo(PageInfo.builder()
+				.page(responseDtos.getNumber())
+				.size(responseDtos.getSize())
+				.totalPages(responseDtos.getTotalPages())
+				.totalElements(responseDtos.getTotalElements())
+				.hasNext(responseDtos.hasNext())
+				.hasPrevious(responseDtos.hasPrevious())
+				.build())
+			.build();
+
+		ApiResponse<UserListReponseDto> response = ApiResponse.<UserListReponseDto>builder()
+			.code(200)
+			.message("승인 거절 가게 주인 목록 조회 성공")
+			.data(responseDto)
+			.build();
+
+		return ResponseEntity.ok(response);
+
+	}
+
+	//가게 주인 회원 승인
+	@PatchMapping("/{id}/approve")
+	public ResponseEntity<ApiResponse<OwnerStatusChangeResponseDto>> approveOwner(@PathVariable UUID id) {
+
+		OwnerStatusChangeResponseDto responseDto = userService.approveOwner(id);
+
+		ApiResponse<OwnerStatusChangeResponseDto> response = ApiResponse.<OwnerStatusChangeResponseDto>builder()
+			.code(200)
+			.message("회원 승인 성공")
+			.data(responseDto)
+			.build();
+
+		return ResponseEntity.ok(response);
+
+	}
+
+	//가게 주인 회원 거절
+	@PatchMapping("/{id}/reject")
+	public ResponseEntity<ApiResponse<OwnerStatusChangeResponseDto>> rejectOwner(
+		@PathVariable UUID id,
+		@RequestParam(required = false) String reason
+	) {
+
+		OwnerStatusChangeResponseDto responseDto = userService.rejectOwner(id, reason);
+
+		ApiResponse<OwnerStatusChangeResponseDto> response = ApiResponse.<OwnerStatusChangeResponseDto>builder()
+			.code(200)
+			.message("회원 거절 성공")
+			.data(responseDto)
+			.build();
+
+		return ResponseEntity.ok(response);
+
+	}
+
 }

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import com.tweaty.user.domain.model.ApprovalStatus;
 import com.tweaty.user.domain.model.Owner;
 import com.tweaty.user.domain.repository.OwnerRepository;
 
@@ -37,5 +38,10 @@ public class OwnerRepositoryImpl implements OwnerRepository {
 	@Override
 	public Page<Owner> getPendingOwnersList(Pageable pageable, String sortBy, String order) {
 		return userQueryDslRepository.getPendingOwnersList(pageable, sortBy, order);
+	}
+
+	@Override
+	public Page<Owner> getOwnersList(ApprovalStatus approvalStatus, Pageable pageable, String sortBy, String order) {
+		return userQueryDslRepository.getOwnersList(approvalStatus, pageable, sortBy, order);
 	}
 }
