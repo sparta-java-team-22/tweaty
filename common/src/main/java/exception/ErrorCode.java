@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 public enum ErrorCode {
 	// 로그인 및 인증 관련 오류
 	USER_NOT_FOUND("ERROR-U001", "사용자를 찾을 수 없습니다."),
-	USER_FORBIDDEN("ERROR-U002", "사용자 권한이 없습니다."),
+	UNAUTHORIZED_ADMIN("ERROR-U002", "관리자 권한이 아닙니다."),
+	UNAUTHORIZED_OWNER("ERROR-U002", "가게 주인 권한이 아닙니다."),
 
 	// 이벤트
 	PROMOTION_DUPLICATED("ERROR-P001", "이미 존재하고 있는 이벤트입니다."),
@@ -32,11 +33,12 @@ public enum ErrorCode {
 	REFUND_ALREADY_USED("ERROR-P004","이미 환불된 결제입니다."),
 	REFUND_FAIL("ERROR-P005","환불 처리 중 오류가 발생했습니다."),
 
-		// 쿠폰
+	// 쿠폰
 	COUPON_NOT_FOUND("ERROR-C001", "쿠폰을 찾을 수 없습니다."),
 	COUPON_EXPIRED("ERROR-C002", "쿠폰 발급 기간이 아닙니다."),
 	COUPON_OUT_OF_STOCK("ERROR-C003", "남은 쿠폰 수량이 없습니다."),
-	COUPON_ALREADY_ISSUED("ERROR-C004", "고객에게 이미 발급된 쿠폰입니다.");
+	COUPON_ALREADY_ISSUED("ERROR-C004", "고객에게 이미 발급된 쿠폰입니다."),
+	COUPON_ISSUE_NOT_FOUND("ERROR-C005", "고객에게 발급된 쿠폰을 찾을 수 없습니다.");
 
 	private final String code;
 	private final String message;
