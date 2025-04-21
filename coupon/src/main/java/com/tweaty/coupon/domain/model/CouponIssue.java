@@ -3,8 +3,6 @@ package com.tweaty.coupon.domain.model;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.tweaty.coupon.presentation.request.CouponIssueRequest;
-
 import base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -49,15 +47,23 @@ public class CouponIssue extends BaseEntity {
 
 	public static CouponIssue create(
 		Coupon coupon,
-		//UUID customerId,
-		CouponIssueRequest request
+		UUID customerId,
+		LocalDateTime now
 	) {
 		return CouponIssue.builder()
 			.couponId(coupon.getCouponId())
-			//.customerId(customerId)
+			.customerId(customerId)
 			.couponIssueAt(LocalDateTime.now())
-			.couponExpiryAt(request.couponExpiryAt())
+			.couponExpiryAt(now)
 			.couponStatus(CouponStatus.UNUSED)
 			.build();
+	}
+
+	public void updateUsedCouponStatus() {
+		couponStatus = CouponStatus.USED;
+	}
+
+	public void updateUnusedCouponStatus() {
+		couponStatus = CouponStatus.UNUSED;
 	}
 }
