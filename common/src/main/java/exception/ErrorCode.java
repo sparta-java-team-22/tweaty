@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum ErrorCode {
 	// 로그인 및 인증 관련 오류
 	USER_NOT_FOUND("ERROR-U001", "사용자를 찾을 수 없습니다."),
+	USER_FORBIDDEN("ERROR-U002", "사용자 권한이 없습니다."),
 	USERNAME_ALREADY_EXISTS("ERROR-U002", "이미 사용 중인 아이디입니다."),
 	EMAIL_ALREADY_EXISTS("ERROR-U003", "이미 사용 중인 이메일입니다."),
 	PHONE_ALREADY_EXISTS("ERROR-U004", "이미 사용 중인 전화번호입니다."),
