@@ -9,12 +9,12 @@ import com.tweaty.store_service.menu.presentation.dto.response.MenuResponseDto;
 
 public interface MenuService {
 
-	UUID createMenu(MenuRequestDto req, UUID storeId);
+	UUID createMenu(MenuRequestDto req, UUID storeId, UUID userId, String role);
 
-	void updateMenu(MenuRequestDto req, UUID menuId);
+	void updateMenu(MenuRequestDto req, UUID menuId, UUID userId, String role);
 
-	void deleteMenu(UUID menuId);
+	void deleteMenu(UUID menuId, UUID userId, String role);
 
-	Page<MenuResponseDto> getMenuList(int page, int size,UUID storeId);
+	Page<MenuResponseDto> getMenuList(int page, int size, UUID storeId);
 
 }

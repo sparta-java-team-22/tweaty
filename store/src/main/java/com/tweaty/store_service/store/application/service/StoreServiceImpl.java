@@ -17,10 +17,13 @@ import com.tweaty.store_service.store.global.exception.CustomException;
 import com.tweaty.store_service.store.presentation.dto.request.StoreRequestDto;
 import com.tweaty.store_service.store.presentation.dto.response.StoreResponseDto;
 
+import domain.Role;
 import exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class StoreServiceImpl implements StoreService {
 
@@ -29,8 +32,9 @@ public class StoreServiceImpl implements StoreService {
 	// TODO: 전체 메서드 권한체크 필요
 	@Override
 	@Transactional
-	public UUID createStore(StoreRequestDto req, UUID userId) {
+	public UUID createStore(StoreRequestDto req, UUID userId, String role) {
 
+		roleCheck(role);
 		Store store = req.toEntity(userId);
 
 		storeRepository.save(store);
@@ -39,16 +43,18 @@ public class StoreServiceImpl implements StoreService {
 
 	@Override
 	@Transactional
-	public void updateStore(StoreRequestDto req, UUID storeId) {
-		Store store = findStore(storeId);
+	public void updateStore(StoreRequestDto req, UUID storeId, UUID userId, String role) {
+		roleCheck(role);
+		Store store = findStore(storeId, userId, role);
 
 		store.update(req);
 	}
 
 	@Override
 	@Transactional
-	public void deleteStore(UUID storeId) {
-		Store store = findStore(storeId);
+	public void deleteStore(UUID storeId, UUID userId, String role) {
+		roleCheck(role);
+		Store store = findStore(storeId, userId, role);
 
 		store.softDelete();
 	}
@@ -86,6 +92,25 @@ public class StoreServiceImpl implements StoreService {
 		return storeRepository.searchStoreList(name, isReservation, isWaiting, pageable).map(StoreResponseDto::toDto);
 	}
 
+	public Store findStore(UUID storeId, UUID userId, String role) {
+		log.info("?? : {}",storeId);
+		Store store = storeRepository.findById(storeId)
+			.orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND, HttpStatus.NOT_FOUND));
+
+		log.info("여기 못오잖아 ? {} ",storeId);
+
+
+		if (store.getIsDeleted()) {
+			throw new CustomException(ErrorCode.STORE_ALREADY_DELETED, HttpStatus.BAD_REQUEST);
+		}
+
+		if (role.equals(Role.ROLE_OWNER.name()) && !store.getUserId().equals(userId)) {
+			throw new CustomException(ErrorCode.USER_FORBIDDEN, HttpStatus.FORBIDDEN);
+		}
+
+		return store;
+	}
+
 	public Store findStore(UUID storeId) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND, HttpStatus.NOT_FOUND));
@@ -93,7 +118,14 @@ public class StoreServiceImpl implements StoreService {
 		if (store.getIsDeleted()) {
 			throw new CustomException(ErrorCode.STORE_ALREADY_DELETED, HttpStatus.BAD_REQUEST);
 		}
+
 		return store;
+	}
+
+	private void roleCheck(String role) {
+		if (!role.equals(Role.ROLE_OWNER.name()) && !role.equals(Role.ROLE_ADMIN.name())) {
+			throw new CustomException(ErrorCode.USER_FORBIDDEN, HttpStatus.FORBIDDEN);
+		}
 	}
 
 }

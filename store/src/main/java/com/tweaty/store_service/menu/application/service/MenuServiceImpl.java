@@ -18,6 +18,7 @@ import com.tweaty.store_service.store.application.service.StoreService;
 import com.tweaty.store_service.store.domain.entity.Store;
 import com.tweaty.store_service.store.global.exception.CustomException;
 
+import domain.Role;
 import exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 
@@ -30,9 +31,9 @@ public class MenuServiceImpl implements MenuService {
 
 	@Override
 	@Transactional
-	public UUID createMenu(MenuRequestDto req, UUID storeId) {
-
-		Store store = storeService.findStore(storeId);
+	public UUID createMenu(MenuRequestDto req, UUID storeId, UUID userId, String role) {
+		roleCheck(role);
+		Store store = storeService.findStore(storeId, userId, role);
 		Menu menu = req.toEntity(store);
 
 		menuRepository.save(menu);
@@ -42,32 +43,30 @@ public class MenuServiceImpl implements MenuService {
 
 	@Override
 	@Transactional
-	public void updateMenu(MenuRequestDto req, UUID menuId) {
-		Menu menu = findMenu(menuId);
+	public void updateMenu(MenuRequestDto req, UUID menuId, UUID userId, String role) {
+		roleCheck(role);
+		Menu menu = findMenu(menuId, userId, role);
 		menu.update(req);
 	}
 
-
 	@Override
 	@Transactional
-	public void deleteMenu(UUID menuId) {
-		Menu menu = findMenu(menuId);
+	public void deleteMenu(UUID menuId, UUID userId, String role) {
+		roleCheck(role);
+		Menu menu = findMenu(menuId, userId, role);
 		menu.softDelete();
 	}
 
-
 	@Override
 	@Transactional(readOnly = true)
-	public Page<MenuResponseDto> getMenuList(int page, int size,UUID storeId) {
+	public Page<MenuResponseDto> getMenuList(int page, int size, UUID storeId) {
 
 		Pageable pageable = PageRequest.of(page, size);
 
 		storeService.findStore(storeId);
 
-		return menuRepository.findByStoreIdAndIsDeletedIsFalse(storeId,pageable).map(MenuResponseDto::toDto);
+		return menuRepository.findByStoreIdAndIsDeletedIsFalse(storeId, pageable).map(MenuResponseDto::toDto);
 	}
-
-
 
 	private Menu findMenu(UUID menuId) {
 		Menu menu = menuRepository.findById(menuId)
@@ -80,6 +79,25 @@ public class MenuServiceImpl implements MenuService {
 		storeService.findStore(menu.getStore().getId());
 
 		return menu;
+	}
+
+	public Menu findMenu(UUID menuId, UUID userId, String role) {
+		Menu menu = menuRepository.findById(menuId)
+			.orElseThrow(() -> new CustomException(ErrorCode.MENU_NOT_FOUND, HttpStatus.NOT_FOUND));
+
+		if (menu.getIsDeleted()) {
+			throw new CustomException(ErrorCode.MENU_ALREADY_DELETED, HttpStatus.BAD_REQUEST);
+		}
+
+		storeService.findStore(menu.getStore().getId(), userId, role);
+
+		return menu;
+	}
+
+	private void roleCheck(String role) {
+		if (!role.equals(Role.ROLE_OWNER.name()) && !role.equals(Role.ROLE_ADMIN.name())) {
+			throw new CustomException(ErrorCode.USER_FORBIDDEN, HttpStatus.FORBIDDEN);
+		}
 	}
 
 }

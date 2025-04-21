@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.tweaty.payment.presentation.dto.response.CouponReadResponse;
 
-@FeignClient("coupon")
+@FeignClient("coupon-service")
 public interface CouponClient {
 
-	@GetMapping("/api/v1/coupons/{couponId}/test")
-	CouponReadResponse getCouponTest(@PathVariable UUID couponId);
+	@GetMapping("/api/v1/coupons/{couponId}")
+	CouponReadResponse getCoupon(@PathVariable UUID couponId);
 }
 
 
