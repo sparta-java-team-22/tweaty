@@ -1,5 +1,6 @@
 package com.tweaty.notification.presentation.controller;
 
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -23,9 +24,10 @@ import com.tweaty.notification.application.dto.NotificationRequestDto;
 import com.tweaty.notification.application.dto.PageInfo;
 import com.tweaty.notification.application.dto.ReservationNotificationRequestDto;
 import com.tweaty.notification.application.service.NotificationService;
-import com.tweaty.notification.presentation.common.ApiResponse;
 
 import lombok.RequiredArgsConstructor;
+import response.ApiResponse;
+import response.SuccessResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -88,13 +90,7 @@ public class NotificationController {
 				.build())
 			.build();
 
-		ApiResponse<NotificationListResponseDto> response = ApiResponse.<NotificationListResponseDto>builder()
-			.code(200)
-			.message("알림 목록 조회 성공")
-			.data(responseDto)
-			.build();
-
-		return ResponseEntity.ok(response);
+		return SuccessResponse.successWith(200, "알림 목록 조회 성공", responseDto);
 
 	}
 
@@ -107,13 +103,7 @@ public class NotificationController {
 
 		NotificationReadResponseDto responseDto = notificationService.markAsRead(notiId, id);
 
-		ApiResponse<NotificationReadResponseDto> response = ApiResponse.<NotificationReadResponseDto>builder()
-			.code(200)
-			.message("알림 읽음 처리 수정 성공")
-			.data(responseDto)
-			.build();
-
-		return ResponseEntity.ok(response);
+		return SuccessResponse.successWith(200, "알림 읽음 처리 수정 성공", responseDto);
 	}
 
 	//알림 읽음 전체 처리
@@ -124,35 +114,25 @@ public class NotificationController {
 
 		NotificationReadAllResponseDto responseDto = notificationService.markAsReadAll(id);
 
-		ApiResponse<NotificationReadAllResponseDto> response = ApiResponse.<NotificationReadAllResponseDto>builder()
-			.code(200)
-			.message("알림 전체 읽음 처리 수정 성공")
-			.data(responseDto)
-			.build();
-
-		return ResponseEntity.ok(response);
+		return SuccessResponse.successWith(200, "알림 전체 읽음 처리 수정 성공", responseDto);
 	}
 
 	//알림 삭제
 	@DeleteMapping("/{notiId}/delete")
-	public ResponseEntity<ApiResponse<Void>> deleteNotification(@PathVariable UUID notiId, @RequestHeader("X-USER-ID") UUID id){
+	public ResponseEntity<ApiResponse<Map<String, Object>>> deleteNotification(@PathVariable UUID notiId, @RequestHeader("X-USER-ID") UUID id){
 
 		notificationService.deleteNotification(notiId, id);
 
-		ApiResponse<Void> response = ApiResponse.<Void>builder().code(200).message("알림 삭제 성공").build();
-
-		return ResponseEntity.ok(response);
+		return SuccessResponse.successMessageOnly("알림 전체 삭제 성공");
 	}
 
 	//알림 전체 삭제
 	@DeleteMapping("/delete-all")
-	public ResponseEntity<ApiResponse<Void>> deleteAllNotification(@RequestHeader("X-USER-ID") UUID id){
+	public ResponseEntity<ApiResponse<Map<String, Object>>> deleteAllNotification(@RequestHeader("X-USER-ID") UUID id){
 
 		notificationService.deleteAllNotification(id);
 
-		ApiResponse<Void> response = ApiResponse.<Void>builder().code(200).message("알림 전체 삭제 성공").build();
-
-		return ResponseEntity.ok(response);
+		return SuccessResponse.successMessageOnly("알림 전체 삭제 성공");
 	}
 
 }

@@ -9,13 +9,12 @@ public enum ErrorCode {
 	// 로그인 및 인증 관련 오류
 	USER_NOT_FOUND("ERROR-U001", "사용자를 찾을 수 없습니다."),
 	USER_FORBIDDEN("ERROR-U002", "사용자 권한이 없습니다."),
-	USERNAME_ALREADY_EXISTS("ERROR-U002", "이미 사용 중인 아이디입니다."),
-	EMAIL_ALREADY_EXISTS("ERROR-U003", "이미 사용 중인 이메일입니다."),
-	PHONE_ALREADY_EXISTS("ERROR-U004", "이미 사용 중인 전화번호입니다."),
-	ALREADY_APPROVED("ERROR-U005", "이미 승인된 사용자입니다."),
-	INVALID_APPROVAL_STATUS("ERROR-U006", "유효하지 않은 승인 상태입니다."),
-	INVALID_ROLE("ERROR-U007", "유효하지 않는 권한입니다."),
-	ACCESS_DENIED("ERROR-U008", "해당 요청을 수행할 권한이 없습니다."),
+	USERNAME_ALREADY_EXISTS("ERROR-U003", "이미 사용 중인 아이디입니다."),
+	EMAIL_ALREADY_EXISTS("ERROR-U004", "이미 사용 중인 이메일입니다."),
+	PHONE_ALREADY_EXISTS("ERROR-U005", "이미 사용 중인 전화번호입니다."),
+	ALREADY_APPROVED("ERROR-U006", "이미 승인된 사용자입니다."),
+	INVALID_APPROVAL_STATUS("ERROR-U007", "유효하지 않은 승인 상태입니다."),
+	INVALID_ROLE("ERROR-U008", "유효하지 않는 권한입니다."),
 	INVALID_PASSWORD("ERROR-U009", "비밀번호가 올바르지 않습니다."),
 
 	//알림

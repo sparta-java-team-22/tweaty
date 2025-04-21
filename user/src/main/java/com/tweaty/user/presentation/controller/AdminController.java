@@ -18,10 +18,11 @@ import com.tweaty.user.application.dto.UserListDto;
 import com.tweaty.user.application.dto.UserListReponseDto;
 import com.tweaty.user.application.dto.UserViewResponseDto;
 import com.tweaty.user.application.service.UserService;
-import com.tweaty.user.presentation.common.ApiResponse;
 
 import domain.Role;
 import lombok.RequiredArgsConstructor;
+import response.ApiResponse;
+import response.SuccessResponse;
 
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
 @RestController
@@ -37,13 +38,7 @@ public class AdminController {
 
 		UserViewResponseDto responseDto = userService.getUser(id);
 
-		ApiResponse<UserViewResponseDto> response = ApiResponse.<UserViewResponseDto>builder()
-			.code(200)
-			.message("회원 조회 성공")
-			.data(responseDto)
-			.build();
-
-		return ResponseEntity.ok(response);
+		return SuccessResponse.successWith(200, "회원 조회 성공", responseDto);
 
 	}
 
@@ -71,13 +66,7 @@ public class AdminController {
 				.build())
 			.build();
 
-		ApiResponse<UserListReponseDto> response = ApiResponse.<UserListReponseDto>builder()
-			.code(200)
-			.message("회원 목록 조회 성공")
-			.data(responseDto)
-			.build();
-
-		return ResponseEntity.ok(response);
+		return SuccessResponse.successWith(200, "회원 목록 조회 성공", responseDto);
 
 	}
 
@@ -103,13 +92,7 @@ public class AdminController {
 				.build())
 			.build();
 
-		ApiResponse<UserListReponseDto> response = ApiResponse.<UserListReponseDto>builder()
-			.code(200)
-			.message("승인 대기 가게 주인 목록 조회 성공")
-			.data(responseDto)
-			.build();
-
-		return ResponseEntity.ok(response);
+		return SuccessResponse.successWith(200, "승인 대기 가게 주인 목록 조회 성공", responseDto);
 
 	}
 
@@ -135,13 +118,7 @@ public class AdminController {
 				.build())
 			.build();
 
-		ApiResponse<UserListReponseDto> response = ApiResponse.<UserListReponseDto>builder()
-			.code(200)
-			.message("승인 거절 가게 주인 목록 조회 성공")
-			.data(responseDto)
-			.build();
-
-		return ResponseEntity.ok(response);
+		return SuccessResponse.successWith(200, "승인 거절 가게 주인 목록 조회 성공", responseDto);
 
 	}
 
@@ -151,13 +128,7 @@ public class AdminController {
 
 		OwnerStatusChangeResponseDto responseDto = userService.approveOwner(id);
 
-		ApiResponse<OwnerStatusChangeResponseDto> response = ApiResponse.<OwnerStatusChangeResponseDto>builder()
-			.code(200)
-			.message("회원 승인 성공")
-			.data(responseDto)
-			.build();
-
-		return ResponseEntity.ok(response);
+		return SuccessResponse.successWith(200, "회원 승인 성공", responseDto);
 
 	}
 
@@ -170,13 +141,7 @@ public class AdminController {
 
 		OwnerStatusChangeResponseDto responseDto = userService.rejectOwner(id, reason);
 
-		ApiResponse<OwnerStatusChangeResponseDto> response = ApiResponse.<OwnerStatusChangeResponseDto>builder()
-			.code(200)
-			.message("회원 거절 성공")
-			.data(responseDto)
-			.build();
-
-		return ResponseEntity.ok(response);
+		return SuccessResponse.successWith(200, "회원 거절 성공", responseDto);
 
 	}
 

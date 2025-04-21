@@ -6,7 +6,6 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.tweaty.notification.application.dto.NotificationListDto;
 import domain.NotiChannel;
 import domain.NotiStatus;
 import com.tweaty.notification.domain.model.Notification;
