@@ -45,10 +45,14 @@ public class Reservation extends BaseEntity {
 		this.reservationScheduleId = requestDto.getReservationScheduleId();
 		this.userId = userId;
 		this.guestCount = requestDto.getGuestCount();
-		this.status = ReservationStatus.COMPLETED;
+		this.status = ReservationStatus.READY;
 	}
 
 	public void update(ReservationRequestDto requestDto) {
 		this.guestCount = requestDto.getGuestCount();
+	}
+
+	public void updateStatus(ReservationStatus status) {
+		this.status = status;
 	}
 }

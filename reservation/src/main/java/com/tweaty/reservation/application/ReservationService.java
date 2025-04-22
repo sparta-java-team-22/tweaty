@@ -3,14 +3,20 @@ package com.tweaty.reservation.application;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tweaty.reservation.application.dto.ReservationResponseDto;
+import com.tweaty.reservation.application.dto.StoreResponseDto;
 import com.tweaty.reservation.domain.model.Reservation;
 import com.tweaty.reservation.domain.model.ReservationSchedule;
+import com.tweaty.reservation.domain.model.ReservationStatus;
 import com.tweaty.reservation.domain.repository.ReservationRepository;
 import com.tweaty.reservation.domain.repository.ReservationScheduleRepository;
+import com.tweaty.reservation.presentation.client.PaymentClient;
+import com.tweaty.reservation.presentation.client.StoreClient;
+import com.tweaty.reservation.presentation.request.PaymentRequestDto;
 import com.tweaty.reservation.presentation.request.ReservationRequestDto;
 
 import lombok.RequiredArgsConstructor;
@@ -21,12 +27,18 @@ public class ReservationService {
 
 	private final ReservationRepository reservationRepository;
 	private final ReservationScheduleRepository reservationScheduleRepository;
+	private final StoreClient storeClient;
+	private final PaymentClient paymentClient;
 
 	@Transactional
 	public void createReservation(ReservationRequestDto requestDto, UUID userId) {
 		ReservationSchedule reservationSchedule = reservationScheduleRepository.findByIdAndIsDeletedFalse(
 				requestDto.getReservationScheduleId())
 			.orElseThrow(() -> new IllegalArgumentException("예약 일정을 찾을 수 없습니다."));
+		StoreResponseDto store = storeClient.getStore(requestDto.getStoreId());
+		if (store == null) {
+			throw new IllegalArgumentException("가게를 찾을 수 없습니다.");
+		}
 
 		if (requestDto.getGuestCount() <= 0) {
 			throw new IllegalArgumentException("손님 수는 1명 이상이어야 합니다.");
@@ -45,7 +57,23 @@ public class ReservationService {
 		}
 		reservationSchedule.updateTakenCount(requestDto.getGuestCount());
 
-		reservationRepository.save(new Reservation(requestDto, userId));
+		PaymentRequestDto paymentRequestDto = PaymentRequestDto.builder()
+			.originalAmount(store.getReservationAmount())
+			.couponId(requestDto.getCouponId())
+			.method(requestDto.getMethod())
+			.build();
+
+		Reservation reservation = reservationRepository.save(new Reservation(requestDto, userId));
+
+		ResponseEntity<?> responseEntity = paymentClient.createKafkaPayment(paymentRequestDto, reservation.getId());
+
+		if (responseEntity.getStatusCode().is2xxSuccessful()) {
+			reservation.updateStatus(ReservationStatus.COMPLETED);
+		} else {
+			reservation.updateStatus(ReservationStatus.FAILED);
+			throw new IllegalArgumentException("결제에 실패했습니다.");
+		}
+
 	}
 
 	public ReservationResponseDto getReservationById(UUID reservationId) {
