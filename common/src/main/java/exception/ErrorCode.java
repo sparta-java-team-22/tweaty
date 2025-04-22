@@ -10,6 +10,20 @@ public enum ErrorCode {
 	USER_NOT_FOUND("ERROR-U001", "사용자를 찾을 수 없습니다."),
 	UNAUTHORIZED_ADMIN("ERROR-U002", "관리자 권한이 아닙니다."),
 	UNAUTHORIZED_OWNER("ERROR-U002", "가게 주인 권한이 아닙니다."),
+	USER_FORBIDDEN("ERROR-U003", "사용자 권한이 없습니다."),
+	USERNAME_ALREADY_EXISTS("ERROR-U004", "이미 사용 중인 아이디입니다."),
+	EMAIL_ALREADY_EXISTS("ERROR-U005", "이미 사용 중인 이메일입니다."),
+	PHONE_ALREADY_EXISTS("ERROR-U006", "이미 사용 중인 전화번호입니다."),
+	ALREADY_APPROVED("ERROR-U007", "이미 승인된 사용자입니다."),
+	INVALID_APPROVAL_STATUS("ERROR-U008", "유효하지 않은 승인 상태입니다."),
+	INVALID_ROLE("ERROR-U009", "유효하지 않는 권한입니다."),
+	INVALID_PASSWORD("ERROR-U010", "비밀번호가 올바르지 않습니다."),
+
+	//알림
+	INVALID_NOTIFICATION_TYPE("ERROR-N001", "알 수 없는 알림 타입입니다."),
+	INVALID_NOTIFICATION_CHANNEL("ERROR-N002", "알 수 없는 알림 채널입니다."),
+	NOTIFICATION_NOT_FOUND("ERROR-N003", "알림이 존재하지 않습니다."),
+	NOTIFICATION_FORBIDDEN_ACCESS("ERROR-N004", "본인의 알림만 처리할 수 있습니다."),
 
 	// 이벤트
 	PROMOTION_DUPLICATED("ERROR-P001", "이미 존재하고 있는 이벤트입니다."),

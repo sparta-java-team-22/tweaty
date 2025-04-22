@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 
 import com.tweaty.user.domain.model.User;
 
+import domain.Role;
+
 public interface UserRepository {
 
 	boolean existsByUsername(String username);
@@ -22,5 +24,5 @@ public interface UserRepository {
 
 	Optional<User> findById(UUID userId);
 
-	Page<User> getUserList(String key, Pageable pageable, String sortBy, String order);
+	Page<User> getUserList(String key, Role role, Pageable pageable, String sortBy, String order);
 }

@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.tweaty.user.domain.model.ApprovalStatus;
 import com.tweaty.user.domain.model.Owner;
 
 public interface OwnerRepository {
@@ -17,5 +18,7 @@ public interface OwnerRepository {
 	Page<Owner> getOwnerList(String key, Pageable pageable, String sortBy, String order);
 
 	Page<Owner> getPendingOwnersList(Pageable pageable, String sortBy, String order);
+
+	Page<Owner> getOwnersList(ApprovalStatus approvalStatus, Pageable pageable, String sortBy, String order);
 
 }
