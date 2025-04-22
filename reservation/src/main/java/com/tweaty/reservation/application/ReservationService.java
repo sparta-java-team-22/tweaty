@@ -17,6 +17,7 @@ import com.tweaty.reservation.domain.repository.ReservationScheduleRepository;
 import com.tweaty.reservation.presentation.client.PaymentClient;
 import com.tweaty.reservation.presentation.client.StoreClient;
 import com.tweaty.reservation.presentation.request.PaymentRequestDto;
+import com.tweaty.reservation.presentation.request.RefundRequestDto;
 import com.tweaty.reservation.presentation.request.ReservationRequestDto;
 
 import lombok.RequiredArgsConstructor;
@@ -69,6 +70,7 @@ public class ReservationService {
 
 		if (responseEntity.getStatusCode().is2xxSuccessful()) {
 			reservation.updateStatus(ReservationStatus.COMPLETED);
+			reservation.updatePayment(responseEntity.getBody().getPaymentId(), requestDto.getCouponId());
 		} else {
 			reservation.updateStatus(ReservationStatus.FAILED);
 			throw new IllegalArgumentException("결제에 실패했습니다.");
@@ -130,6 +132,12 @@ public class ReservationService {
 			throw new IllegalArgumentException("예약을 취소할 권한이 없습니다.");
 		}
 
+		RefundRequestDto requestDto = RefundRequestDto.builder()
+			.reason("예약 취소")
+			.couponId(reservation.getCouponId())
+			.build();
+
+		paymentClient.createRefund(requestDto, reservation.getPaymentId());
 		reservationSchedule.updateDeleteTakenCount(reservation.getGuestCount());
 		reservation.softDelete();
 

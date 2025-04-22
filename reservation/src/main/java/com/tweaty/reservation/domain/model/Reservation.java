@@ -34,6 +34,12 @@ public class Reservation extends BaseEntity {
 	@Column(name = "user_id", nullable = false)
 	private UUID userId;
 
+	@Column(name = "coupon_id")
+	private UUID couponId;
+
+	@Column(name = "payment_id")
+	private UUID paymentId;
+
 	@Column(name = "guest_count", nullable = false)
 	private int guestCount;
 
@@ -54,5 +60,10 @@ public class Reservation extends BaseEntity {
 
 	public void updateStatus(ReservationStatus status) {
 		this.status = status;
+	}
+
+	public void updatePayment(UUID paymentId, UUID couponId) {
+		this.paymentId = paymentId;
+		this.couponId = couponId;
 	}
 }
