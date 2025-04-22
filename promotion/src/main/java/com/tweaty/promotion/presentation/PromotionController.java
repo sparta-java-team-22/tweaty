@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +19,8 @@ import com.tweaty.promotion.application.dto.PromotionReadResponse;
 import com.tweaty.promotion.application.dto.PromotionTimeAttackCouponResponse;
 import com.tweaty.promotion.presentation.request.PromotionCreateRequest;
 
+import constant.UserConstant;
+import domain.Role;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -27,7 +30,12 @@ public class PromotionController {
 	private final PromotionService promotionService;
 
 	@PostMapping()
-	public ResponseEntity<PromotionCreateResponse> createEvent(@RequestBody PromotionCreateRequest request) {
+	public ResponseEntity<PromotionCreateResponse> createEvent(
+		@RequestBody PromotionCreateRequest request,
+		@RequestHeader(UserConstant.X_USER_ROLE) Role role
+	) {
+		Role.checkAdmin(role);
+
 		PromotionCreateResponse response = promotionService.createEvent(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
@@ -39,7 +47,12 @@ public class PromotionController {
 	}
 
 	@PatchMapping("/{eventId}/end")
-	public ResponseEntity<Void> updateEventStatusToEnded(@PathVariable UUID eventId) {
+	public ResponseEntity<Void> updateEventStatusToEnded(
+		@PathVariable UUID eventId,
+		@RequestHeader(UserConstant.X_USER_ROLE) Role role
+	) {
+		Role.checkAdmin(role);
+
 		promotionService.updateEventStatusToEnded(eventId);
 		return ResponseEntity.noContent().build();
 	}
