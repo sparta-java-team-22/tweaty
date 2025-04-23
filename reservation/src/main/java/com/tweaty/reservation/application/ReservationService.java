@@ -1,12 +1,14 @@
 package com.tweaty.reservation.application;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tweaty.reservation.application.dto.PaymentIdDto;
 import com.tweaty.reservation.application.dto.ReservationResponseDto;
 import com.tweaty.reservation.application.dto.StoreResponseDto;
 import com.tweaty.reservation.domain.model.Reservation;
@@ -66,11 +68,14 @@ public class ReservationService {
 
 		Reservation reservation = reservationRepository.save(new Reservation(requestDto, userId));
 
-		ResponseEntity<?> responseEntity = paymentClient.createKafkaPayment(paymentRequestDto, reservation.getId());
+		ResponseEntity<?> responseEntity = paymentClient.createKafkaPayment(userId, paymentRequestDto,
+			reservation.getId());
+
+		PaymentIdDto paymentIdDto = (PaymentIdDto)responseEntity.getBody();
 
 		if (responseEntity.getStatusCode().is2xxSuccessful()) {
 			reservation.updateStatus(ReservationStatus.COMPLETED);
-			reservation.updatePayment(responseEntity.getBody().getPaymentId(), requestDto.getCouponId());
+			reservation.updatePayment(Objects.requireNonNull(paymentIdDto).getPaymentId(), requestDto.getCouponId());
 		} else {
 			reservation.updateStatus(ReservationStatus.FAILED);
 			throw new IllegalArgumentException("결제에 실패했습니다.");
@@ -137,7 +142,7 @@ public class ReservationService {
 			.couponId(reservation.getCouponId())
 			.build();
 
-		paymentClient.createRefund(requestDto, reservation.getPaymentId());
+		paymentClient.createRefund(userId, role, requestDto, reservation.getPaymentId());
 		reservationSchedule.updateDeleteTakenCount(reservation.getGuestCount());
 		reservation.softDelete();
 
