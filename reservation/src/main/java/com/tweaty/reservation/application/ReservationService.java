@@ -87,13 +87,28 @@ public class ReservationService {
 		Reservation reservation = reservationRepository.findByIdAndIsDeletedFalse(reservationId)
 			.orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
 
-		return ReservationResponseDto.from(reservation);
+		ReservationResponseDto responseDto = ReservationResponseDto.from(reservation);
+		StoreResponseDto store = storeClient.getStore(reservation.getStoreId());
+		if (store == null) {
+			throw new IllegalArgumentException("가게를 찾을 수 없습니다.");
+		}
+		responseDto.updateStoreName(store.getName());
+
+		return responseDto;
 	}
 
 	public List<ReservationResponseDto> getAllReservations(UUID userId) {
 		List<Reservation> reservations = reservationRepository.findByUserId(userId);
 
-		return ReservationResponseDto.froms(reservations);
+		List<ReservationResponseDto> responseDtoList = ReservationResponseDto.froms(reservations);
+		for (ReservationResponseDto responseDto : responseDtoList) {
+			StoreResponseDto store = storeClient.getStore(reservations.get(0).getStoreId());
+			if (store == null) {
+				throw new IllegalArgumentException("가게를 찾을 수 없습니다.");
+			}
+			responseDto.updateStoreName(store.getName());
+		}
+		return responseDtoList;
 	}
 
 	@Transactional
