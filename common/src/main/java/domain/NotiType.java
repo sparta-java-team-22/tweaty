@@ -1,0 +1,14 @@
+package domain;
+
+public enum NotiType {
+	CREATED,
+	MODIFIED,
+	CANCELLED,
+	REMINDER,
+
+	//
+	SIGNUP_USER,
+	SIGNUP_OWNER,
+	SIGNUP_OWNER_APPROVED,
+	SIGNUP_OWNER_REJECTED
+}

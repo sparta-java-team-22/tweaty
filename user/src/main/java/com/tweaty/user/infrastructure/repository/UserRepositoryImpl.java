@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import com.tweaty.user.domain.model.User;
 import com.tweaty.user.domain.repository.UserRepository;
 
+import domain.Role;
 import lombok.RequiredArgsConstructor;
 
 @Repository
@@ -50,8 +51,8 @@ public class UserRepositoryImpl implements UserRepository {
 	}
 
 	@Override
-	public Page<User> getUserList(String key, Pageable pageable, String sortBy, String order) {
-		return userQueryDslRepository.getUserList(key, pageable, sortBy, order);
+	public Page<User> getUserList(String key, Role role, Pageable pageable, String sortBy, String order) {
+		return userQueryDslRepository.getUserList(key, role, pageable, sortBy, order);
 	}
 }
 

@@ -27,15 +27,18 @@ public class UserQueryDslRepositoryImpl {
 
 	private final JPAQueryFactory jpaQueryFactory;
 
-	public Page<User> getUserList(String key, Pageable pageable, String sortBy, String order) {
+	public Page<User> getUserList(String key, Role role, Pageable pageable, String sortBy, String order) {
 
 		OrderSpecifier<?> orderSpecifier = getOrderSpecifier(sortBy, order, "customer");
 
 		BooleanBuilder builder = new BooleanBuilder();
-		builder.and(user.role.eq(Role.ROLE_CUSTOMER));
+
+		if(role != null) {
+			builder.and(user.role.eq(role));
+		}
 
 		if (key != null && !key.isBlank()) {
-			builder.and(user.username.containsIgnoreCase(key));
+			builder.and(user.name.containsIgnoreCase(key));
 		}
 
 		List<User> userList = jpaQueryFactory
@@ -63,7 +66,7 @@ public class UserQueryDslRepositoryImpl {
 		builder.and(owner.user.role.eq(Role.ROLE_OWNER));
 
 		if (key != null && !key.isBlank()) {
-			builder.and(owner.user.username.containsIgnoreCase(key));
+			builder.and(owner.user.name.containsIgnoreCase(key));
 		}
 
 		List<Owner> ownerList = jpaQueryFactory
@@ -107,6 +110,31 @@ public class UserQueryDslRepositoryImpl {
 
 		return new PageImpl<>(ownerList, pageable, total);
 
+	}
+
+	public Page<Owner> getOwnersList(ApprovalStatus approvalStatus, Pageable pageable, String sortBy, String order) {
+
+		OrderSpecifier<?> orderSpecifier = getOrderSpecifier(sortBy, order, "owner");
+
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(owner.user.role.eq(Role.ROLE_OWNER));
+		builder.and(owner.approvalStatus.eq(approvalStatus));
+
+		List<Owner> ownerList = jpaQueryFactory
+			.selectFrom(owner)
+			.where(builder)
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize())
+			.orderBy(orderSpecifier)
+			.fetch();
+
+		long total = jpaQueryFactory
+			.select(owner.count())
+			.from(owner)
+			.where(builder)
+			.fetchOne();
+
+		return new PageImpl<>(ownerList, pageable, total);
 	}
 
 	private OrderSpecifier<?> getOrderSpecifier(String sortBy, String order, String role) {

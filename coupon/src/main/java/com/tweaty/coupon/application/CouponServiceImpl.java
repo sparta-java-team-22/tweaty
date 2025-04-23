@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tweaty.coupon.application.dto.CouponCreateResponse;
 import com.tweaty.coupon.application.dto.CouponIssueResponse;
 import com.tweaty.coupon.application.dto.CouponReadResponse;
+import com.tweaty.coupon.application.dto.CouponStatusUpdateResponse;
 import com.tweaty.coupon.application.dto.CouponUpdateResponse;
 import com.tweaty.coupon.domain.model.Coupon;
 import com.tweaty.coupon.domain.model.CouponIssue;
@@ -21,12 +22,13 @@ import com.tweaty.coupon.exception.CouponExpiredException;
 import com.tweaty.coupon.exception.CouponNotFoundException;
 import com.tweaty.coupon.exception.CouponOutOfStockException;
 import com.tweaty.coupon.presentation.request.CouponCreateRequest;
-import com.tweaty.coupon.presentation.request.CouponIssueRequest;
 import com.tweaty.coupon.presentation.request.CouponUpdateRequest;
 
 import exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CouponServiceImpl implements CouponService {
@@ -48,24 +50,34 @@ public class CouponServiceImpl implements CouponService {
 	@Transactional
 	public CouponIssueResponse issueCoupon(
 		UUID couponId,
-		//UUID customerId,
-		CouponIssueRequest request
+		UUID customerId
 	) {
 		// 쿠폰 유효성 검사
 		Coupon coupon = couponRepository.findByCouponIdWithLock(couponId);
-		checkCouponPeriod(coupon);
+		log.info("📍쿠폰 ID: {}, 원래 재고: {}, 발급 전 남은 재고: {}",
+			coupon.getCouponId(),
+			coupon.getCouponMaxIssuance().getValue(),
+			coupon.getCouponRemainingStock().getValue()
+		);
+
+		LocalDateTime currentTime = LocalDateTime.now();
+
+		checkCouponPeriod(coupon, currentTime);
 		// lock 걸린 coupon 사용
 		checkCouponStock(coupon);
 
 		// 중복 발급 검사
-		//checkAlreadyIssued(couponId, customerId);
+		checkAlreadyIssued(couponId, customerId);
 
-		// 재고 차감 -> todo. 테스트로 동시성 + 재고 차감 되는지 확인
+		// 재고 차감
 		coupon.updateCouponRemainingStock();
+		log.info("📍쿠폰 ID: {}, 원래 재고: {}, 발급 전 남은 재고: {}",
+			coupon.getCouponId(),
+			coupon.getCouponMaxIssuance().getValue(),
+			coupon.getCouponRemainingStock().getValue()
+		);
 
-		// CouponIssue Insert
-		// todo. customerId 추가 예정
-		CouponIssue couponIssue = CouponIssue.create(coupon, request);
+		CouponIssue couponIssue = CouponIssue.create(coupon, customerId, currentTime);
 		couponIssueRepository.save(couponIssue);
 
 		return CouponIssueResponse.from(couponIssue);
@@ -93,16 +105,39 @@ public class CouponServiceImpl implements CouponService {
 		coupon.softDelete();
 	}
 
+	@Override
+	@Transactional
+	public CouponStatusUpdateResponse useCoupon(
+		UUID couponId,
+		UUID customerId
+	) {
+		CouponIssue couponIssue = findCouponIssue(couponId, customerId);
+
+		couponIssue.updateUsedCouponStatus();
+
+		return CouponStatusUpdateResponse.from(couponIssue);
+	}
+
+	@Override
+	@Transactional
+	public CouponStatusUpdateResponse cancelCoupon(UUID couponId, UUID customerId) {
+		CouponIssue couponIssue = findCouponIssue(couponId, customerId);
+
+		couponIssue.updateUnusedCouponStatus();
+
+		return CouponStatusUpdateResponse.from(couponIssue);
+	}
+
 	private Coupon findCoupon(UUID couponId) {
 		return couponRepository.findByCouponId(couponId)
 			.orElseThrow(() -> new CouponNotFoundException(ErrorCode.COUPON_NOT_FOUND));
 	}
 
-	private void checkCouponPeriod(Coupon coupon) {
-		LocalDateTime now = LocalDateTime.now();
+	private void checkCouponPeriod(Coupon coupon, LocalDateTime currentTime) {
 		CouponIssuancePeriod couponIssuancePeriod = coupon.getCouponIssuancePeriod();
 
-		if (now.isBefore(couponIssuancePeriod.getStartAt()) || now.isAfter(couponIssuancePeriod.getEndAt())) {
+		if (currentTime.isBefore(couponIssuancePeriod.getStartAt()) || currentTime.isAfter(
+			couponIssuancePeriod.getEndAt())) {
 			throw new CouponExpiredException(ErrorCode.COUPON_EXPIRED);
 		}
 	}
@@ -118,5 +153,10 @@ public class CouponServiceImpl implements CouponService {
 		if (couponIssueRepository.existsByCouponIdAndCustomerId(couponId, customerId)) {
 			throw new CouponAlreadyIssuedException(ErrorCode.COUPON_ALREADY_ISSUED);
 		}
+	}
+
+	private CouponIssue findCouponIssue(UUID couponId, UUID customerId) {
+		return couponIssueRepository.findByCouponIdAndCustomerId(couponId, customerId)
+			.orElseThrow(() -> new CouponNotFoundException(ErrorCode.COUPON_ISSUE_NOT_FOUND));
 	}
 }

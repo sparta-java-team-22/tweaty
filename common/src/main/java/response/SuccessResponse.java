@@ -1,12 +1,9 @@
-package com.tweaty.store_service.store.global;
+package response;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import java.util.Map;
-import java.util.HashMap;
-
-import com.tweaty.store_service.store.global.ApiResponse;
 
 public class SuccessResponse {
 

@@ -54,7 +54,7 @@ public class PaymentEventConsumer {
 
 		try {
 			if (event.getCouponId() != null) {
-				CouponReadResponse coupon = couponClient.getCouponTest(event.getCouponId());
+				CouponReadResponse coupon = couponClient.getCoupon(event.getCouponId());
 				int finalAmount = paymentDomainService.calculateDiscount(
 					event.getOriginalAmount(), coupon.discountAmount(), coupon.discountType()
 				);

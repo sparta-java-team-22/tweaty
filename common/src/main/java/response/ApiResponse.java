@@ -1,4 +1,4 @@
-package com.tweaty.store_service.store.global;
+package response;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -6,9 +6,9 @@ import lombok.Getter;
 @Getter
 @Builder
 public class ApiResponse<T> {
-	private int code;       // 200, 201 같은 HTTP 응답 코드
-	private String message; // 성공 메시지
-	private T data;         // 추가 데이터 (storeId 등)
+	private int code;
+	private String message;
+	private T data;
 
 	public static <T> ApiResponse<T> of(int code, String message, T data) {
 		return ApiResponse.<T>builder()

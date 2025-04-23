@@ -1,8 +1,8 @@
 package com.tweaty.auth.presentation.controller;
 
+import java.util.Map;
 import java.util.Set;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -23,12 +23,13 @@ import com.tweaty.auth.application.dto.PasswordUpdateRequestDto;
 import com.tweaty.auth.application.dto.UserResponseDto;
 import com.tweaty.auth.application.dto.UserSignUpRequestDto;
 import com.tweaty.auth.application.service.AuthService;
-import com.tweaty.auth.presentation.common.ApiResponse;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
+import response.ApiResponse;
+import response.SuccessResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -46,13 +47,7 @@ public class AuthController {
 
 		UserResponseDto responseDto = authService.userSignUp(requestDto);
 
-		ApiResponse<UserResponseDto> response = ApiResponse.<UserResponseDto>builder()
-			.code(201)
-			.message("회원가입 완료")
-			.data(responseDto)
-			.build();
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		return SuccessResponse.successWith(201, "회원가입 완료", responseDto);
 	}
 
 	//가게 주인 사용자 회원가입
@@ -80,13 +75,7 @@ public class AuthController {
 
 		OwnerResponseDto responseDto = authService.ownerSignUp(requestDto, file);
 
-		ApiResponse<OwnerResponseDto> response = ApiResponse.<OwnerResponseDto>builder()
-			.code(201)
-			.message("회원가입 완료. 관리자 승인까지 대기")
-			.data(responseDto)
-			.build();
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		return SuccessResponse.successWith(201, "회원가입 완료. 관리자 승인까지 대기", responseDto);
 	}
 
 	//로그인
@@ -95,25 +84,17 @@ public class AuthController {
 
 		LoginResponseDto responseDto = authService.login(requestDto);
 
-		ApiResponse<LoginResponseDto> response = ApiResponse.<LoginResponseDto>builder()
-			.code(200)
-			.message("로그인 성공")
-			.data(responseDto)
-			.build();
-
-		return ResponseEntity.ok(response);
+		return SuccessResponse.successWith(200, "로그인 성공", responseDto);
 	}
 
 	//비밀번호 수정
 	@PutMapping("/password")
-	public ResponseEntity<ApiResponse<Void>> updatePassword(@RequestHeader("X-USERNAME") String username,
+	public ResponseEntity<ApiResponse<Map<String, Object>>> updatePassword(@RequestHeader("X-USERNAME") String username,
 		@RequestBody PasswordUpdateRequestDto requestDto) {
 
 		authService.updatePassword(username, requestDto);
 
-		ApiResponse<Void> response = ApiResponse.<Void>builder().code(200).message("비밀번호 수정 성공").build();
-
-		return ResponseEntity.ok(response);
+		return SuccessResponse.successMessageOnly("비밀번호 수정 성공");
 	}
 
 }

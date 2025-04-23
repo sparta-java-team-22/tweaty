@@ -10,11 +10,11 @@ import com.tweaty.store_service.store.presentation.dto.response.StoreResponseDto
 
 public interface StoreService {
 
-	UUID createStore(StoreRequestDto req, UUID userId);
+	UUID createStore(StoreRequestDto req, UUID userId,String role);
 
-	void updateStore(StoreRequestDto req, UUID storeId);
+	void updateStore(StoreRequestDto req, UUID storeId,UUID userId,String role);
 
-	void deleteStore(UUID storeId);
+	void deleteStore(UUID storeId,UUID userId,String role);
 
 	StoreResponseDto getStore(UUID storeId);
 
@@ -24,4 +24,5 @@ public interface StoreService {
 	Page<StoreResponseDto> getStoreListByOwner(int page, int size, UUID userId);
 
 	Store findStore(UUID storeId);
+	Store findStore(UUID storeId,UUID userId,String role);
 }

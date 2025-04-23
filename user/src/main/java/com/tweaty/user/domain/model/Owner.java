@@ -49,5 +49,13 @@ public class Owner {
 
 		return owner;
 	}
+
+	public void approveOwner(){
+		this.approvalStatus = ApprovalStatus.APPROVED;
+	}
+
+	public void rejectOwner() {
+		this.approvalStatus = ApprovalStatus.REJECTED;
+	}
 }
 
