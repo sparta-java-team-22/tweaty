@@ -125,8 +125,9 @@ public class ReservationService {
 		List<Reservation> reservations = reservationRepository.findByUserId(userId);
 
 		List<ReservationResponseDto> responseDtoList = ReservationResponseDto.froms(reservations);
-		for (ReservationResponseDto responseDto : responseDtoList) {
-			StoreResponseDto store = storeClient.getStore(reservations.get(0).getStoreId());
+		for (int i = 0; i < responseDtoList.size(); i++) {
+			ReservationResponseDto responseDto = responseDtoList.get(i);
+			StoreResponseDto store = storeClient.getStore(reservations.get(i).getStoreId());
 			if (store == null) {
 				throw new IllegalArgumentException("가게를 찾을 수 없습니다.");
 			}
