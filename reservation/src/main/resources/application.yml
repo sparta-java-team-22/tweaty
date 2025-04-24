@@ -28,4 +28,4 @@ eureka:
   instance:
     hostname: localhost
 server:
-  port: ${RESERVATION_SERVER_PORT}
+  port: 19095

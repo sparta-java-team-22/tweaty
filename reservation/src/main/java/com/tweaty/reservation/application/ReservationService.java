@@ -1,7 +1,10 @@
 package com.tweaty.reservation.application;
 
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
@@ -16,12 +19,17 @@ import com.tweaty.reservation.domain.model.ReservationSchedule;
 import com.tweaty.reservation.domain.model.ReservationStatus;
 import com.tweaty.reservation.domain.repository.ReservationRepository;
 import com.tweaty.reservation.domain.repository.ReservationScheduleRepository;
+import com.tweaty.reservation.presentation.client.NotificationClient;
 import com.tweaty.reservation.presentation.client.PaymentClient;
 import com.tweaty.reservation.presentation.client.StoreClient;
+import com.tweaty.reservation.presentation.request.NotificationRequestDto;
 import com.tweaty.reservation.presentation.request.PaymentRequestDto;
 import com.tweaty.reservation.presentation.request.RefundRequestDto;
 import com.tweaty.reservation.presentation.request.ReservationRequestDto;
 
+import domain.NotiChannel;
+import domain.NotiType;
+import domain.TargetType;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -32,6 +40,7 @@ public class ReservationService {
 	private final ReservationScheduleRepository reservationScheduleRepository;
 	private final StoreClient storeClient;
 	private final PaymentClient paymentClient;
+	private final NotificationClient notificationClient;
 
 	@Transactional
 	public void createReservation(ReservationRequestDto requestDto, UUID userId) {
@@ -76,6 +85,21 @@ public class ReservationService {
 		if (responseEntity.getStatusCode().is2xxSuccessful()) {
 			reservation.updateStatus(ReservationStatus.COMPLETED);
 			reservation.updatePayment(Objects.requireNonNull(paymentIdDto).getPaymentId(), requestDto.getCouponId());
+			Set<NotiChannel> channels = new HashSet<>();
+			channels.add(NotiChannel.WEB);
+			channels.add(NotiChannel.EMAIL);
+			NotificationRequestDto notificationRequestDto = NotificationRequestDto.builder()
+				.receiverId(store.getUserId())
+				.targetType(TargetType.RESERVATION)
+				.notiChannel(channels)
+				.notiType(NotiType.CREATED)
+				.reason(null)
+				.targetId(userId)
+				.count(requestDto.getGuestCount())
+				.reservationDateTime(LocalDateTime.parse(
+					reservationSchedule.getReservationTime() + " " + reservationSchedule.getReservationDate()))
+				.build();
+			notificationClient.createReservationNotification(notificationRequestDto);
 		} else {
 			reservation.updateStatus(ReservationStatus.FAILED);
 			throw new IllegalArgumentException("결제에 실패했습니다.");
@@ -136,6 +160,24 @@ public class ReservationService {
 
 		reservationSchedule.updateTakenCount(requestDto.getGuestCount(), reservation.getGuestCount());
 		reservation.update(requestDto);
+
+		reservationSchedule.updateDeleteTakenCount(reservation.getGuestCount());
+		StoreResponseDto store = storeClient.getStore(reservation.getStoreId());
+		Set<NotiChannel> channels = new HashSet<>();
+		channels.add(NotiChannel.WEB);
+		channels.add(NotiChannel.EMAIL);
+		NotificationRequestDto notificationRequestDto = NotificationRequestDto.builder()
+			.receiverId(store.getUserId())
+			.targetType(TargetType.RESERVATION)
+			.notiChannel(channels)
+			.notiType(NotiType.MODIFIED)
+			.reason(null)
+			.targetId(userId)
+			.count(reservation.getGuestCount())
+			.reservationDateTime(LocalDateTime.parse(
+				reservationSchedule.getReservationTime() + " " + reservationSchedule.getReservationDate()))
+			.build();
+		notificationClient.createReservationNotification(notificationRequestDto);
 		reservationRepository.save(reservation);
 	}
 
@@ -159,6 +201,22 @@ public class ReservationService {
 
 		paymentClient.createRefund(userId, role, requestDto, reservation.getPaymentId());
 		reservationSchedule.updateDeleteTakenCount(reservation.getGuestCount());
+		StoreResponseDto store = storeClient.getStore(reservation.getStoreId());
+		Set<NotiChannel> channels = new HashSet<>();
+		channels.add(NotiChannel.WEB);
+		channels.add(NotiChannel.EMAIL);
+		NotificationRequestDto notificationRequestDto = NotificationRequestDto.builder()
+			.receiverId(store.getUserId())
+			.targetType(TargetType.RESERVATION)
+			.notiChannel(channels)
+			.notiType(NotiType.CANCELLED)
+			.reason(null)
+			.targetId(userId)
+			.count(reservation.getGuestCount())
+			.reservationDateTime(LocalDateTime.parse(
+				reservationSchedule.getReservationTime() + " " + reservationSchedule.getReservationDate()))
+			.build();
+		notificationClient.createReservationNotification(notificationRequestDto);
 		reservation.softDelete();
 
 	}
