@@ -10,5 +10,5 @@ public interface CouponRepository {
 
 	Optional<Coupon> findByCouponId(UUID couponId);
 
-	Coupon findByCouponIdWithLock(UUID couponId);
+	Coupon findByIdWithPessimisticLock(UUID couponId);
 }

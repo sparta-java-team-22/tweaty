@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tweaty.coupon.application.CouponService;
 import com.tweaty.coupon.application.dto.CouponCreateResponse;
-import com.tweaty.coupon.application.dto.CouponIssueResponse;
 import com.tweaty.coupon.application.dto.CouponReadResponse;
 import com.tweaty.coupon.application.dto.CouponStatusUpdateResponse;
 import com.tweaty.coupon.application.dto.CouponUpdateResponse;
@@ -41,15 +40,6 @@ public class CouponController {
 		Role.checkAdmin(role);
 
 		CouponCreateResponse response = couponService.createCoupon(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
-	}
-
-	@PostMapping("/{couponId}/issue")
-	public ResponseEntity<CouponIssueResponse> issueCoupon(
-		@PathVariable UUID couponId,
-		@RequestHeader(UserConstant.X_USER_ID) UUID customerId
-	) {
-		CouponIssueResponse response = couponService.issueCoupon(couponId, customerId);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 

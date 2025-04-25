@@ -1,5 +1,10 @@
 server:
   port: ${PROMOTION_SERVER_PORT}
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 20
+    accept-count: 100
 
 spring:
   config:
@@ -19,6 +24,19 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+  kafka:
+    bootstrap-servers: localhost:10000
+    topics:
+      coupon-create: time-attack-coupon-create
+
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      username: ${REDIS_USERNAME}
+      password: ${REDIS_PASSWORD}
 
 eureka:
   client:

@@ -1,25 +1,25 @@
 services:
-  eureka-service:
-    build:
-      context: ./eureka
-      dockerfile: Dockerfile
-    container_name: tweaty-eureka
-    ports:
-      - "19090:19090"
-    networks:
-      - mynetwork
-
-  gateway-service:
-    build:
-      context: ./gateway
-      dockerfile: Dockerfile
-    container_name: tweaty-gateway
-    ports:
-      - "19091:19091"
-    depends_on:
-      - eureka-service
-    networks:
-      - mynetwork
+  #  eureka-service:
+  #    build:
+  #      context: ./eureka
+  #      dockerfile: Dockerfile
+  #    container_name: tweaty-eureka
+  #    ports:
+  #      - "19090:19090"
+  #    networks:
+  #      - mynetwork
+  #
+  #  gateway-service:
+  #    build:
+  #      context: ./gateway
+  #      dockerfile: Dockerfile
+  #    container_name: tweaty-gateway
+  #    ports:
+  #      - "19091:19091"
+  #    depends_on:
+  #      - eureka-service
+  #    networks:
+  #      - mynetwork
 
   db:
     container_name: tweaty-db
@@ -30,15 +30,86 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
-    depends_on:
-      - eureka-service
+    #    depends_on:
+    #      - eureka-service
     networks:
       - mynetwork
     ports:
       - "5432:5432"
 
+  zipkin:
+    container_name: tweaty-zipkin
+    image: openzipkin/zipkin:latest
+    ports:
+      - "9411:9411"
+    networks:
+      - mynetwork
+
+  kafka:
+    container_name: tweaty-kafka
+    image: bitnami/kafka:3.7.0
+    ports:
+      - '9092:9092'
+      - '10000:10000'
+    environment:
+      # 기본 KRaft 모드 설정
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_BROKER_ID=0
+      - KAFKA_KRAFT_CLUSTER_ID=TweatyKafkaClu
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@tweaty-kafka:9093
+      # 리스너 설정 (내부 통신, 컨트롤러 통신)
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:10000
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://tweaty-kafka:9092,EXTERNAL://localhost:10000
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      #- KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      # 기본 설정 (토픽 복제 1개로)
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_CFG_NUM_PARTITIONS=3
+    volumes:
+      - kafka-data:/bitnami/kafka
+    networks:
+      - mynetwork
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    restart: unless-stopped
+    container_name: tweaty-kafka-ui
+    ports:
+      - '8085:8080'
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=Local-Kraft-Cluster
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=tweaty-kafka:9092
+      - DYNAMIC_CONFIG_ENABLED=true
+      - KAFKA_CLUSTERS_0_AUDIT_TOPICAUDITENABLED=true
+      - KAFKA_CLUSTERS_0_AUDIT_CONSOLEAUDITENABLED=true
+    depends_on:
+      - kafka
+    networks:
+      - mynetwork
+
+  redis:
+    container_name: tweaty-redis
+    image: redis:latest
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+    env_file:
+      - .env
+    networks:
+      - mynetwork
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+
 volumes:
   tweaty-data:
+  kafka-data:
+  redis-data:
 
 networks:
   mynetwork:
