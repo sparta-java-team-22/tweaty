@@ -88,7 +88,8 @@ public class Coupon extends BaseEntity {
 	}
 
 	public void updateCouponRemainingStock() {
-		couponRemainingStock.decreaseQuantity();
+		int newValue = couponRemainingStock.getValue() - 1;
+		this.couponRemainingStock = Quantity.from(newValue);
 	}
 
 	public void updateCoupon(CouponUpdateRequest request) {

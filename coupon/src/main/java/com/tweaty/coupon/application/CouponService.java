@@ -3,7 +3,6 @@ package com.tweaty.coupon.application;
 import java.util.UUID;
 
 import com.tweaty.coupon.application.dto.CouponCreateResponse;
-import com.tweaty.coupon.application.dto.CouponIssueResponse;
 import com.tweaty.coupon.application.dto.CouponReadResponse;
 import com.tweaty.coupon.application.dto.CouponStatusUpdateResponse;
 import com.tweaty.coupon.application.dto.CouponUpdateResponse;
@@ -12,8 +11,6 @@ import com.tweaty.coupon.presentation.request.CouponUpdateRequest;
 
 public interface CouponService {
 	CouponCreateResponse createCoupon(CouponCreateRequest request);
-
-	CouponIssueResponse issueCoupon(UUID couponId, UUID customerId);
 
 	CouponReadResponse getCoupon(UUID couponId);
 
