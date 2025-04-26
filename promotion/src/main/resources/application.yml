@@ -3,31 +3,3 @@ spring:
     name: promotion-service
   profiles:
     active: local
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "prometheus"
-        exclude: env, beans
-  metrics:
-    tags:
-      application: ${spring.application.name}
-    distribution:
-      percentiles-histogram.http.server.request: true
-  tracing:
-    sampling:
-      probability: 1.0
-    propagation:
-      consume: B3
-      produce: B3
-    baggage:
-      correlation:
-        enabled: true
-  zipkin:
-    tracing:
-      endpoint: http://localhost:9411/api/v2/spans
-
-logging:
-  pattern:
-    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

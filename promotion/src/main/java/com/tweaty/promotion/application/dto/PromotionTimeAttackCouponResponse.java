@@ -5,14 +5,14 @@ import java.util.UUID;
 
 import com.tweaty.promotion.infrastructure.client.dto.CouponIssueResponse;
 
-public record PromotionTimeAttackCouponSyncResponse(
+public record PromotionTimeAttackCouponResponse(
 	UUID couponIssueId,
 	LocalDateTime couponIssuedAt,
 	LocalDateTime couponExpiredAt,
 	Boolean isCouponIssued
 ) {
-	public static PromotionTimeAttackCouponSyncResponse from(CouponIssueResponse couponIssueResponse) {
-		return new PromotionTimeAttackCouponSyncResponse(
+	public static PromotionTimeAttackCouponResponse from(CouponIssueResponse couponIssueResponse) {
+		return new PromotionTimeAttackCouponResponse(
 			couponIssueResponse.couponIssueId(),
 			couponIssueResponse.couponIssuedAt(),
 			couponIssueResponse.couponExpiredAt(),
