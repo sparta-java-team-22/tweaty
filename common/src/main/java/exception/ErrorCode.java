@@ -46,6 +46,8 @@ public enum ErrorCode {
 	REFUND_NOT_FOUND("ERROR-P003","환불내역을 찾을 수 없습니다."),
 	REFUND_ALREADY_USED("ERROR-P004","이미 환불된 결제입니다."),
 	REFUND_FAIL("ERROR-P005","환불 처리 중 오류가 발생했습니다."),
+	PAYMENT_LOCK_FAILED("ERROR-P006","결제 조회 처리에 실패했습니다."),
+	PAYMENT_DUPLICATE("ERROR-P007","이미 결제된 가게입니다."),
 
 	// 쿠폰
 	COUPON_NOT_FOUND("ERROR-C001", "쿠폰을 찾을 수 없습니다."),

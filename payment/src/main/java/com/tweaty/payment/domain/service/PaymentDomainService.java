@@ -1,7 +1,11 @@
 package com.tweaty.payment.domain.service;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -15,6 +19,7 @@ import com.tweaty.payment.domain.entity.RefundType;
 import com.tweaty.payment.domain.repository.PaymentRepository;
 import com.tweaty.payment.domain.repository.RefundRepository;
 import com.tweaty.payment.global.exception.CustomException;
+import com.tweaty.payment.presentation.dto.request.PaymentRequestDto;
 
 import exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +50,12 @@ public class PaymentDomainService {
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void saveReadyPayment(Payment payment) {
-		paymentRepository.save(payment);
+		try {
+			paymentRepository.save(payment);
+		} catch (Exception e) {
+			log.error("결제 에러발생", e);
+			throw new CustomException(ErrorCode.PAYMENT_DUPLICATE, HttpStatus.CONFLICT);
+		}
 	}
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -77,6 +87,22 @@ public class PaymentDomainService {
 		}
 
 		return refund;
+	}
+
+	public Payment toReadyPayment(PaymentRequestDto req, UUID userId, UUID reservationId) {
+
+		if (paymentRepository.existsByUserIdAndReservationId(userId, reservationId)) {
+			throw new CustomException(ErrorCode.PAYMENT_DUPLICATE, HttpStatus.CONFLICT);
+		}
+		Payment payment = Payment.toReadyEntity(req, reservationId, userId);
+		saveReadyPayment(payment);
+
+		return payment;
+	}
+
+	public Boolean existsPayment( UUID userId, UUID reservationId) {
+
+		return paymentRepository.existsByUserIdAndReservationId(userId, reservationId);
 	}
 }
 

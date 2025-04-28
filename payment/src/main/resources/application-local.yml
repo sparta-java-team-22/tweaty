@@ -1,4 +1,5 @@
 spring:
+
   datasource:
     url: jdbc:postgresql://localhost:5432/${DB_NAME}
     username: ${DB_USER}
@@ -13,6 +14,13 @@ spring:
       hibernate:
   #        format_sql: true
   #        show_sql: true
+
+  data:
+    redis:
+      host: payment-redis
+      port: 6379
+
+
   kafka:
     bootstrap-servers: localhost:9092
     producer:
@@ -24,6 +32,8 @@ spring:
       group-id: payment-service-group
       properties:
         spring.json.trusted.packages: "*"
+
+
 
 server:
   port: 19097

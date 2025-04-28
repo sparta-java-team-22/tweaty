@@ -1,5 +1,9 @@
 package com.tweaty.payment.infrastucture.kafka.consumer;
 
+import java.util.concurrent.TimeUnit;
+
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -31,6 +35,7 @@ public class PaymentEventConsumer {
 	private final PaymentDomainService paymentDomainService;
 	private final KafkaPaymentProducer kafkaPaymentProducer;
 	private final CouponClient couponClient;
+	private final RedissonClient redissonClient;
 
 	@KafkaListener(topics = "payment-success", groupId = "payment-consumer")
 	public void consumePaymentSuccess(PaymentSuccessEvent event) {
@@ -52,6 +57,11 @@ public class PaymentEventConsumer {
 
 		Payment payment = paymentDomainService.findPayment(event.getPaymentId());
 
+		if (payment.isCompleted()) {
+			log.info("이미 처리된 결제입니다. paymentId: {}", payment.getId());
+			return;
+		}
+
 		try {
 			if (event.getCouponId() != null) {
 				CouponReadResponse coupon = couponClient.getCoupon(event.getCouponId());
@@ -59,6 +69,11 @@ public class PaymentEventConsumer {
 					event.getOriginalAmount(), coupon.discountAmount(), coupon.discountType()
 				);
 				payment.applyDiscount(coupon.discountAmount(), finalAmount);
+			}
+
+			if (payment.isCompleted()) {
+				log.warn("결제 처리 도중 상태 변경됨. 중복 처리 방지. paymentId: {}", payment.getId());
+				return;
 			}
 
 			payment.successPayment();
@@ -75,4 +90,72 @@ public class PaymentEventConsumer {
 			kafkaPaymentProducer.sendFailedEvent(PaymentFailedEvent.toDto(payment));
 		}
 	}
+
+	@KafkaListener(topics = "payment-create-redisson", groupId = "payment-service")
+	@Transactional
+	public void handleCreatePaymentByRedisson(PaymentCreateEvent event) {
+
+		log.info("결제 생성 이벤트 수신: {}", event);
+
+		String lockKey = "payment-lock:" + event.getUserId() + ":" + event.getReservationId();
+		RLock lock = redissonClient.getLock(lockKey);
+
+		boolean isLocked = false;
+		try {
+			// 2초 동안 락 획득 시도, 10초 동안 점유
+			isLocked = lock.tryLock(2, 10, TimeUnit.SECONDS);
+
+			if (!isLocked) {
+				log.warn("락 획득 실패: 결제 처리 중단. paymentId={}", event.getPaymentId());
+				return; // 락 못잡으면 처리하지 않음
+			}
+
+			Payment payment = paymentDomainService.findPayment(event.getPaymentId());
+
+			if (payment.isCompleted()) {
+				log.info("이미 완료된 결제입니다. paymentId: {}", payment.getId());
+				return;
+			}
+
+			try {
+				if (event.getCouponId() != null) {
+					CouponReadResponse coupon = couponClient.getCoupon(event.getCouponId());
+					int finalAmount = paymentDomainService.calculateDiscount(
+						event.getOriginalAmount(), coupon.discountAmount(), coupon.discountType()
+					);
+					payment.applyDiscount(coupon.discountAmount(), finalAmount);
+				}
+
+				if (payment.isCompleted()) {
+					log.warn("처리 중 상태 변경됨. 중복 방지. paymentId={}", payment.getId());
+					return;
+				}
+
+				payment.successPayment();
+				paymentRepository.save(payment);
+				log.info("[Kafka 처리 완료] Payment 저장");
+
+				kafkaPaymentProducer.sendSuccessEvent(PaymentSuccessEvent.toDto(payment));
+
+			} catch (Exception e) {
+				log.error("결제 실패: {}", e.getMessage());
+
+				if (!payment.isCompleted()) {
+					payment.failPayment();
+					paymentRepository.save(payment);
+
+					kafkaPaymentProducer.sendFailedEvent(PaymentFailedEvent.toDto(payment));
+				}
+			}
+
+		} catch (InterruptedException e) {
+			log.error("락 처리 중 인터럽트 발생", e);
+			Thread.currentThread().interrupt();
+		} finally {
+			// if (isLocked && lock.isHeldByCurrentThread()) {
+			// 	lock.unlock();
+			// }
+		}
+	}
+
 }

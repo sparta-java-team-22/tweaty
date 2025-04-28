@@ -40,6 +40,7 @@ services:
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
     platform: linux/amd64
     ports:
       - "2181:2181"
@@ -52,6 +53,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:latest
+    container_name: kafka
     platform: linux/amd64
     ports:
       - "9092:9092"
@@ -70,6 +72,7 @@ services:
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
     platform: linux/amd64
     ports:
       - "8080:8080"
@@ -84,6 +87,7 @@ services:
 
   controller:
     image: ngrinder/controller
+    container_name: ngrinder
     restart: always
     ports:
       - "9000:80"
@@ -93,16 +97,22 @@ services:
       - ./ngrinder-controller:/opt/ngrinder-controller
   agent1:
     image: ngrinder/agent
+    container_name: ngrinder-agent1
     restart: always
     links:
       - controller
+    environment:
+      - JAVA_OPTS=-Xms1g -Xmx2g
+
 
   agent2:
     image: ngrinder/agent
+    container_name: ngrinder-agent2
     restart: always
     links:
       - controller
-
+    environment:
+      - JAVA_OPTS=-Xms1g -Xmx2g
 
   prometheus:
     image: prom/prometheus
@@ -136,6 +146,7 @@ services:
 
   node_exporter:
     image: prom/node-exporter
+    container_name: node_exporter
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -151,9 +162,18 @@ services:
       - monitoring
 
 
+  payment-redis:
+    image: redis:latest
+    container_name: payment-redis
+    ports:
+      - "6379:6379"
+    restart: always
+
+
+
   zipkin:
-    container_name: zipkin
     image: openzipkin/zipkin
+    container_name: zipkin
     ports:
       - "9411:9411"
     networks:
@@ -169,3 +189,4 @@ networks:
   kafka-net:
   monitoring:
     driver: bridge
+

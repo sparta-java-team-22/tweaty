@@ -35,4 +35,10 @@ public class KafkaPaymentProducer {
 		log.info("결제 요청 이벤트 발행됨: {}", event);
 		kafkaCreateTemplate.send("payment-create", event);
 	}
+
+	public void sendCreateEvenByRedisson(PaymentCreateEvent event) {
+		log.info("결제 요청 이벤트 발행됨: {}", event);
+		kafkaCreateTemplate.send("payment-create-redisson", event);
+	}
+
 }

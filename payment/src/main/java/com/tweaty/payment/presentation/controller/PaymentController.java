@@ -56,6 +56,7 @@ public class PaymentController {
 		return SuccessResponse.successWith(200, "결제 생성 성공", paymentIdDto);
 	}
 
+	// 비관적락 적용
 	@PostMapping("/{reservationId}")
 	public ResponseEntity<?> createKafkaPayment(@RequestHeader("X-USER-ID") UUID userId,
 		@RequestHeader("X-USER-ROLE") String role, @RequestBody PaymentRequestDto req,
@@ -63,7 +64,23 @@ public class PaymentController {
 		Payment payment = Payment.toReadyEntity(req, reservationId, userId);
 		paymentDomainService.saveReadyPayment(payment);
 		kafkaPaymentProducer.sendCreateEvent(PaymentCreateEvent.from(payment));
-		return ResponseEntity.ok("결제 성공");
+
+		PaymentIdDto paymentIdDto = new PaymentIdDto(payment.getId());
+
+		return ResponseEntity.ok(paymentIdDto);
+	}
+
+	// // REDIS + 분산락적용
+	@PostMapping("/{reservationId}/redis")
+	public ResponseEntity<?> createKafkaPaymentV2(@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role, @RequestBody PaymentRequestDto req,
+		@PathVariable UUID reservationId) {
+
+		Payment payment = paymentDomainService.toReadyPayment(req, userId, reservationId);
+		kafkaPaymentProducer.sendCreateEvenByRedisson(PaymentCreateEvent.from(payment));
+		PaymentIdDto paymentIdDto = new PaymentIdDto(payment.getId());
+
+		return ResponseEntity.ok(paymentIdDto);
 	}
 
 	@GetMapping
