@@ -18,7 +18,7 @@ public class ReservationResponseDto {
 
 	public static ReservationResponseDto from(Reservation reservation) {
 		ReservationResponseDto responseDto = new ReservationResponseDto();
-		responseDto.storeName = reservation.getStoreId().toString();
+		responseDto.storeName = null;
 		responseDto.guestCount = reservation.getGuestCount();
 		responseDto.status = reservation.getStatus();
 		responseDto.reservationTime = reservation.getCreatedAt().toString();
@@ -29,5 +29,9 @@ public class ReservationResponseDto {
 
 	public static List<ReservationResponseDto> froms(List<Reservation> reservations) {
 		return reservations.stream().map(ReservationResponseDto::from).toList();
+	}
+
+	public void updateStoreName(String storeName) {
+		this.storeName = storeName;
 	}
 }

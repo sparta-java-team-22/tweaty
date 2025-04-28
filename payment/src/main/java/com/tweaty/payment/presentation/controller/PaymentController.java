@@ -19,7 +19,6 @@ import com.tweaty.payment.application.service.PaymentService;
 import com.tweaty.payment.domain.entity.Payment;
 import com.tweaty.payment.domain.entity.Refund;
 import com.tweaty.payment.domain.service.PaymentDomainService;
-
 import com.tweaty.payment.infrastucture.kafka.event.PaymentCreateEvent;
 import com.tweaty.payment.infrastucture.kafka.event.RefundCreateEvent;
 import com.tweaty.payment.infrastucture.kafka.producer.KafkaPaymentProducer;
@@ -31,7 +30,6 @@ import com.tweaty.payment.presentation.dto.response.PaymentResponseDto;
 import com.tweaty.payment.presentation.dto.response.RefundListResponse;
 import com.tweaty.payment.presentation.dto.response.RefundResponseDto;
 
-import exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import response.SuccessResponse;
 
@@ -60,14 +58,14 @@ public class PaymentController {
 
 	@PostMapping("/{reservationId}")
 	public ResponseEntity<?> createKafkaPayment(@RequestHeader("X-USER-ID") UUID userId,
-		@RequestHeader("X-USER-ROLE") String role, @RequestBody PaymentRequestDto req,
+		@RequestBody PaymentRequestDto req,
 		@PathVariable UUID reservationId) {
 		// 결제 객체 생성(결제요청 상태)
 		Payment payment = Payment.toReadyEntity(req, reservationId, userId);
 		paymentDomainService.saveReadyPayment(payment);
 		kafkaPaymentProducer.sendCreateEvent(PaymentCreateEvent.from(payment));
 		PaymentIdDto paymentIdDto = new PaymentIdDto(payment.getId());
-		return ResponseEntity.ok("결제 성공");
+		return ResponseEntity.ok(paymentIdDto);
 	}
 
 	@GetMapping
