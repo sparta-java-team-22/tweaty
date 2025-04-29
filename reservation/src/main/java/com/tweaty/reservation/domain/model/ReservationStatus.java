@@ -1,9 +1,9 @@
 package com.tweaty.reservation.domain.model;
 
 public enum ReservationStatus {
-	READY("예약 대기"),
-	ACTIVE("예약 진행 중"),
+	READY("예약 결제"),
 	CANCELLED("예약 취소"),
+	FAILED("예약 실패"),
 	COMPLETED("예약 완료"),
 	NOME("찾을 수 없음");
 
