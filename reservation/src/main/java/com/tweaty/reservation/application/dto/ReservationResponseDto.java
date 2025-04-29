@@ -6,8 +6,10 @@ import com.tweaty.reservation.domain.model.Reservation;
 import com.tweaty.reservation.domain.model.ReservationStatus;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class ReservationResponseDto {
 
 	private String storeName;
@@ -15,6 +17,14 @@ public class ReservationResponseDto {
 	private ReservationStatus status;
 	private String reservationTime;
 	private String reservationDate;
+
+	public ReservationResponseDto(Reservation cachedReservation) {
+		this.storeName = null;
+		this.guestCount = cachedReservation.getGuestCount();
+		this.status = cachedReservation.getStatus();
+		this.reservationTime = cachedReservation.getCreatedAt().toString();
+		this.reservationDate = cachedReservation.getCreatedAt().toString();
+	}
 
 	public static ReservationResponseDto from(Reservation reservation) {
 		ReservationResponseDto responseDto = new ReservationResponseDto();
