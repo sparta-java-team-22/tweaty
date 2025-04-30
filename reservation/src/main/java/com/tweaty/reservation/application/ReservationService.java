@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +20,6 @@ import com.tweaty.reservation.domain.model.ReservationSchedule;
 import com.tweaty.reservation.domain.model.ReservationStatus;
 import com.tweaty.reservation.domain.repository.ReservationRepository;
 import com.tweaty.reservation.domain.repository.ReservationScheduleRepository;
-import com.tweaty.reservation.presentation.client.NotificationClient;
 import com.tweaty.reservation.presentation.client.PaymentClient;
 import com.tweaty.reservation.presentation.client.StoreClient;
 import com.tweaty.reservation.presentation.request.NotificationRequestDto;
@@ -40,8 +40,8 @@ public class ReservationService {
 	private final ReservationScheduleRepository reservationScheduleRepository;
 	private final StoreClient storeClient;
 	private final PaymentClient paymentClient;
-	private final NotificationClient notificationClient;
 	private final ReservationCacheService cacheService; // Redis Cache Service 주입
+	private final KafkaTemplate<String, Object> kafkaTemplate; // Kafka Producer
 
 	private static final long CACHE_TTL = 10; // 캐시 TTL 설정 (10분)
 
@@ -106,7 +106,7 @@ public class ReservationService {
 				.reservationDateTime(LocalDateTime.parse(
 					reservationSchedule.getReservationTime() + " " + reservationSchedule.getReservationDate()))
 				.build();
-			notificationClient.createReservationNotification(notificationRequestDto);
+			kafkaTemplate.send("notification-events", notificationRequestDto);
 		} else {
 			reservation.updateStatus(ReservationStatus.FAILED);
 			throw new IllegalArgumentException("결제에 실패했습니다.");
@@ -201,7 +201,7 @@ public class ReservationService {
 			.reservationDateTime(LocalDateTime.parse(
 				reservationSchedule.getReservationTime() + " " + reservationSchedule.getReservationDate()))
 			.build();
-		notificationClient.createReservationNotification(notificationRequestDto);
+		kafkaTemplate.send("notification-events", notificationRequestDto);
 		reservationRepository.save(reservation);
 	}
 
@@ -240,7 +240,7 @@ public class ReservationService {
 			.reservationDateTime(LocalDateTime.parse(
 				reservationSchedule.getReservationTime() + " " + reservationSchedule.getReservationDate()))
 			.build();
-		notificationClient.createReservationNotification(notificationRequestDto);
+		kafkaTemplate.send("notification-events", notificationRequestDto);
 		reservation.softDelete();
 
 	}
