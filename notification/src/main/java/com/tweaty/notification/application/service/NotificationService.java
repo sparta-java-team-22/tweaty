@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,8 +16,6 @@ import com.tweaty.notification.application.dto.NotificationReadResponseDto;
 import com.tweaty.notification.application.dto.NotificationRequestDto;
 import com.tweaty.notification.application.dto.ReservationNotificationRequestDto;
 import com.tweaty.notification.application.dto.UserMailDto;
-import domain.NotiChannel;
-import domain.NotiStatus;
 import com.tweaty.notification.domain.model.Notification;
 import com.tweaty.notification.domain.repository.NotificationRepository;
 import com.tweaty.notification.exception.InvalidNotificationChannelException;
@@ -26,6 +25,8 @@ import com.tweaty.notification.infrastructure.client.UserServiceClient;
 import com.tweaty.notification.infrastructure.notification.EmailNotificationSender;
 import com.tweaty.notification.infrastructure.notification.WebNotificationSender;
 
+import domain.NotiChannel;
+import domain.NotiStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,16 +34,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationService {
-	
+
 	private final NotificationRepository notificationRepository;
 	private final WebNotificationSender webNotificationSender;
 	private final EmailNotificationSender emailNotificationSender;
 	private final UserServiceClient userServiceClient;
 
-
 	public void createSignupNotification(NotificationRequestDto requestDto) {
 
-		for(NotiChannel notiChannel : requestDto.getNotiChannel()) {
+		for (NotiChannel notiChannel : requestDto.getNotiChannel()) {
 
 			NotificationDto notificationDto = new NotificationDto();
 			Notification notification;
@@ -71,9 +71,10 @@ public class NotificationService {
 		}
 	}
 
+	@KafkaListener(topics = "notification-events", groupId = "notification-group")
 	public void createReservationNotification(ReservationNotificationRequestDto requestDto) {
 
-		for(NotiChannel notiChannel : requestDto.getNotiChannel()) {
+		for (NotiChannel notiChannel : requestDto.getNotiChannel()) {
 
 			NotificationDto notificationDto = new NotificationDto();
 			Notification notification;
@@ -108,7 +109,8 @@ public class NotificationService {
 
 		Pageable pageable = PageRequest.of(page, limit);
 
-		Page<Notification> notifications = notificationRepository.findByIdAndNotiChannelAndNotiStatus(id, NotiChannel.WEB, NotiStatus.SENT, pageable);
+		Page<Notification> notifications = notificationRepository.findByIdAndNotiChannelAndNotiStatus(id,
+			NotiChannel.WEB, NotiStatus.SENT, pageable);
 
 		Page<NotificationListDto> notificationListDtos = notifications.map(NotificationListDto::new);
 

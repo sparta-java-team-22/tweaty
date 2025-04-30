@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +20,6 @@ import com.tweaty.reservation.domain.model.ReservationSchedule;
 import com.tweaty.reservation.domain.model.ReservationStatus;
 import com.tweaty.reservation.domain.repository.ReservationRepository;
 import com.tweaty.reservation.domain.repository.ReservationScheduleRepository;
-import com.tweaty.reservation.presentation.client.NotificationClient;
 import com.tweaty.reservation.presentation.client.PaymentClient;
 import com.tweaty.reservation.presentation.client.StoreClient;
 import com.tweaty.reservation.presentation.request.NotificationRequestDto;
@@ -40,7 +40,10 @@ public class ReservationService {
 	private final ReservationScheduleRepository reservationScheduleRepository;
 	private final StoreClient storeClient;
 	private final PaymentClient paymentClient;
-	private final NotificationClient notificationClient;
+	private final ReservationCacheService cacheService; // Redis Cache Service 주입
+	private final KafkaTemplate<String, Object> kafkaTemplate; // Kafka Producer
+
+	private static final long CACHE_TTL = 10; // 캐시 TTL 설정 (10분)
 
 	@Transactional
 	public void createReservation(ReservationRequestDto requestDto, UUID userId) {
@@ -85,6 +88,10 @@ public class ReservationService {
 		if (responseEntity.getStatusCode().is2xxSuccessful()) {
 			reservation.updateStatus(ReservationStatus.COMPLETED);
 			reservation.updatePayment(Objects.requireNonNull(paymentIdDto).getPaymentId(), requestDto.getCouponId());
+
+			// Redis 캐시 저장
+			cacheService.cacheReservation("reservation:" + reservation.getId(), reservation, CACHE_TTL);
+
 			Set<NotiChannel> channels = new HashSet<>();
 			channels.add(NotiChannel.WEB);
 			channels.add(NotiChannel.EMAIL);
@@ -99,17 +106,28 @@ public class ReservationService {
 				.reservationDateTime(LocalDateTime.parse(
 					reservationSchedule.getReservationTime() + " " + reservationSchedule.getReservationDate()))
 				.build();
-			notificationClient.createReservationNotification(notificationRequestDto);
+			kafkaTemplate.send("notification-events", notificationRequestDto);
 		} else {
 			reservation.updateStatus(ReservationStatus.FAILED);
 			throw new IllegalArgumentException("결제에 실패했습니다.");
 		}
-
 	}
 
 	public ReservationResponseDto getReservationById(UUID reservationId) {
+		String cacheKey = "reservation:" + reservationId;
+
+		// Redis 캐시에서 조회
+		Reservation cachedReservation = (Reservation)cacheService.getFromCache(cacheKey);
+		if (cachedReservation != null) {
+			return ReservationResponseDto.from(cachedReservation);
+		}
+
+		// 캐시 미스 시 데이터베이스 조회
 		Reservation reservation = reservationRepository.findByIdAndIsDeletedFalse(reservationId)
 			.orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
+
+		// Redis 캐시에 저장
+		cacheService.cacheReservation(cacheKey, reservation, CACHE_TTL);
 
 		ReservationResponseDto responseDto = ReservationResponseDto.from(reservation);
 		StoreResponseDto store = storeClient.getStore(reservation.getStoreId());
@@ -122,18 +140,23 @@ public class ReservationService {
 	}
 
 	public List<ReservationResponseDto> getAllReservations(UUID userId) {
+		// Redis 캐시 키 설정
+		String cacheKey = "reservations:user:" + userId;
+
+		// Redis 캐시에서 조회
+		@SuppressWarnings("unchecked")
+		List<Reservation> cachedReservations = (List<Reservation>)cacheService.getFromCache(cacheKey);
+		if (cachedReservations != null) {
+			return ReservationResponseDto.froms(cachedReservations);
+		}
+
+		// 캐시 미스 시 데이터베이스 조회
 		List<Reservation> reservations = reservationRepository.findByUserId(userId);
 
-		List<ReservationResponseDto> responseDtoList = ReservationResponseDto.froms(reservations);
-		for (int i = 0; i < responseDtoList.size(); i++) {
-			ReservationResponseDto responseDto = responseDtoList.get(i);
-			StoreResponseDto store = storeClient.getStore(reservations.get(i).getStoreId());
-			if (store == null) {
-				throw new IllegalArgumentException("가게를 찾을 수 없습니다.");
-			}
-			responseDto.updateStoreName(store.getName());
-		}
-		return responseDtoList;
+		// Redis 캐시에 저장
+		cacheService.cacheReservation(cacheKey, reservations, CACHE_TTL);
+
+		return ReservationResponseDto.froms(reservations);
 	}
 
 	@Transactional
@@ -178,7 +201,7 @@ public class ReservationService {
 			.reservationDateTime(LocalDateTime.parse(
 				reservationSchedule.getReservationTime() + " " + reservationSchedule.getReservationDate()))
 			.build();
-		notificationClient.createReservationNotification(notificationRequestDto);
+		kafkaTemplate.send("notification-events", notificationRequestDto);
 		reservationRepository.save(reservation);
 	}
 
@@ -217,7 +240,7 @@ public class ReservationService {
 			.reservationDateTime(LocalDateTime.parse(
 				reservationSchedule.getReservationTime() + " " + reservationSchedule.getReservationDate()))
 			.build();
-		notificationClient.createReservationNotification(notificationRequestDto);
+		kafkaTemplate.send("notification-events", notificationRequestDto);
 		reservation.softDelete();
 
 	}
