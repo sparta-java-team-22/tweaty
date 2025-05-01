@@ -25,10 +25,20 @@ public class RefreshToken implements Serializable {
 
 	private String refreshToken;
 
+	/**
+	 * Updates the access token associated with this refresh token entity.
+	 *
+	 * @param accessToken the new access token to set
+	 */
 	public void updateAccessToken(String accessToken) {
 		this.accessToken = accessToken;
 	}
 
+	/**
+	 * Updates the refresh token value for this entity.
+	 *
+	 * @param refreshToken the new refresh token to set
+	 */
 	public void updateRefreshToken(String refreshToken) {
 		this.refreshToken = refreshToken;
 	}

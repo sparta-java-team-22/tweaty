@@ -39,6 +39,15 @@ public class NotificationService {
 	private final EmailNotificationSender emailNotificationSender;
 	private final UserServiceClient userServiceClient;
 
+	/**
+	 * Creates and sends signup notifications to the specified channels for a user.
+	 *
+	 * For each notification channel in the request, sends a signup notification via web or email.
+	 * Throws an exception if an unsupported channel is specified.
+	 *
+	 * @param requestDto the signup notification request containing recipient and channel information
+	 * @throws InvalidNotificationChannelException if an unsupported notification channel is specified
+	 */
 	public void createSignupNotification(NotificationRequestDto requestDto) {
 
 		for(NotiChannel notiChannel : requestDto.getNotiChannel()) {

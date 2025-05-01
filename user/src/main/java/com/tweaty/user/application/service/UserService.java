@@ -55,6 +55,12 @@ public class UserService {
 	private final NotificationServiceClient notificationServiceClient;
 	private final KafkaTemplate<String, Object> kafkaTemplate;
 
+	/**
+	 * Registers a new user after validating that the username, email, and phone number are unique.
+	 *
+	 * @param requestDto the user registration data
+	 * @return a response DTO representing the newly registered user
+	 */
 	@Transactional
 	public UserResponseDto userSignUp(UserCreateRequestDto requestDto) {
 
@@ -210,6 +216,17 @@ public class UserService {
 		return ownerRepository.getOwnersList(ApprovalStatus.REJECTED, pageable, sortBy, order).map(UserListDto::new);
 	}
 
+	/**
+	 * Approves an owner account by ID and sends an approval notification via Kafka.
+	 *
+	 * If the owner's approval status is PENDING or REJECTED, updates the status to APPROVED and dispatches a notification to the "notification-topic" Kafka topic.
+	 * Throws an exception if the owner is already approved or if the approval status is invalid.
+	 *
+	 * @param id the unique identifier of the owner to approve
+	 * @return an OwnerStatusChangeResponseDto containing the updated owner status
+	 * @throws AlreadyApprovedException if the owner is already approved
+	 * @throws InvalidApprovalStatusException if the owner's approval status is invalid for approval
+	 */
 	@Transactional
 	public OwnerStatusChangeResponseDto approveOwner(UUID id) {
 
@@ -246,6 +263,15 @@ public class UserService {
 		}
 	}
 
+	/**
+	 * Rejects an owner registration request by ID, updates the approval status, and sends a rejection notification.
+	 *
+	 * @param id the unique identifier of the owner to reject
+	 * @param reason the reason for rejection to be included in the notification
+	 * @return an {@code OwnerStatusChangeResponseDto} containing the updated owner status and rejection reason
+	 * @throws AlreadyApprovedException if the owner has already been approved
+	 * @throws InvalidApprovalStatusException if the owner's approval status is invalid for rejection
+	 */
 	@Transactional
 	public OwnerStatusChangeResponseDto rejectOwner(UUID id, String reason) {
 
@@ -293,7 +319,14 @@ public class UserService {
 		return ownerRepository.findById(id).orElseThrow(UserNotFoundException::new);
 	}
 
-	//중복 체크
+	/**
+	 * Checks for duplicate username, email, or phone number in the user repository based on the provided registration data.
+	 *
+	 * @param requestDto the user registration data to check for duplicates
+	 * @throws UsernameAlreadyExistsException if the username already exists
+	 * @throws EmailAlreadyExistsException if the email already exists
+	 * @throws PhoneAlreadyExistsException if the phone number already exists
+	 */
 	private void checkDuplicateUser(UserCreateRequestDto requestDto) {
 
 		if (userRepository.existsByUsername(requestDto.getUsername())) {

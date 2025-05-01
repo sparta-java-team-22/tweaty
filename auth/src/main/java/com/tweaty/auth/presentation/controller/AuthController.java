@@ -88,7 +88,13 @@ public class AuthController {
 		return SuccessResponse.successWith(200, "로그인 성공", responseDto);
 	}
 
-	//비밀번호 수정
+	/**
+	 * Updates the password for the specified user.
+	 *
+	 * @param username the username extracted from the "X-USERNAME" request header
+	 * @param requestDto the password update request payload
+	 * @return a response indicating successful password update
+	 */
 	@PutMapping("/password")
 	public ResponseEntity<ApiResponse<Map<String, Object>>> updatePassword(@RequestHeader("X-USERNAME") String username,
 		@RequestBody PasswordUpdateRequestDto requestDto) {
@@ -98,7 +104,13 @@ public class AuthController {
 		return SuccessResponse.successMessageOnly("비밀번호 수정 성공");
 	}
 
-	// 토큰 재발급
+	/**
+	 * Reissues authentication tokens using the provided authorization header and refresh token.
+	 *
+	 * @param authHeader the value of the Authorization header from the request
+	 * @param requestDto the request body containing the refresh token
+	 * @return a response entity containing the new authentication tokens and a success message
+	 */
 	@PostMapping("/reissue")
 	public ResponseEntity<ApiResponse<LoginResponseDto>> reissueToken(
 		@RequestHeader("Authorization") String authHeader,
@@ -112,7 +124,12 @@ public class AuthController {
 
 	}
 
-	//로그아웃
+	/**
+	 * Logs out the authenticated user by invalidating their session or token.
+	 *
+	 * @param authHeader the Authorization header containing the user's access token
+	 * @return a response indicating successful logout
+	 */
 	@PostMapping("/logout")
 	public ResponseEntity<ApiResponse<Map<String, Object>>> logout(
 		@RequestHeader("Authorization") String authHeader

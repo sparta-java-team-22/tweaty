@@ -15,6 +15,11 @@ public class NotificationKafkaConsumer {
 
 	private final NotificationService notificationService;
 
+	/**
+	 * Consumes signup notification messages from the "notification-topic" Kafka topic and delegates processing to the notification service.
+	 *
+	 * @param requestDto the notification data received from Kafka
+	 */
 	@KafkaListener(topics = "notification-topic", groupId = "notification-service-group")
 	public void consumeSignupNotification(NotificationRequestDto requestDto) {
 

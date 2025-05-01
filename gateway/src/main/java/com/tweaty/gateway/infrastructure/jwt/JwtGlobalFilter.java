@@ -19,6 +19,19 @@ public class JwtGlobalFilter implements GlobalFilter {
 	private final JwtTokenParser tokenParser;
 	private final StringRedisTemplate redisTemplate;
 
+	/**
+	 * Intercepts incoming HTTP requests to enforce JWT authentication and token blacklist validation.
+	 *
+	 * <p>Allows unauthenticated access to specific public or internal endpoints. For all other requests,
+	 * validates the presence and format of the Authorization header, checks if the JWT token is blacklisted in Redis,
+	 * and parses the token to extract user information. If valid, adds user-related headers to the request and forwards it.
+	 * Responds with 403 Forbidden if the Authorization header is missing or invalid, and 401 Unauthorized if the token is blacklisted
+	 * or token parsing fails.
+	 *
+	 * @param exchange the current server web exchange
+	 * @param chain the gateway filter chain
+	 * @return a {@code Mono<Void>} that completes when request processing is finished
+	 */
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
