@@ -117,7 +117,13 @@ public class NotificationController {
 		return SuccessResponse.successWith(200, "알림 전체 읽음 처리 수정 성공", responseDto);
 	}
 
-	//알림 삭제
+	/**
+	 * Deletes a specific notification for the given user.
+	 *
+	 * @param notiId the unique identifier of the notification to delete
+	 * @param id the unique identifier of the user (from the X-USER-ID header)
+	 * @return a success response indicating the notification was deleted
+	 */
 	@DeleteMapping("/{notiId}/delete")
 	public ResponseEntity<ApiResponse<Map<String, Object>>> deleteNotification(@PathVariable UUID notiId, @RequestHeader("X-USER-ID") UUID id){
 

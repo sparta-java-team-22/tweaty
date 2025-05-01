@@ -25,7 +25,12 @@ public class AuthTokenProvider {
 	@Value("${jwt.secret}")
 	private String secretKey;
 	private final long accessTokenValidTime = 60 * 60 * 1000L; //1시간
-	private final long refreshTokenValidTime = 60L * 60 * 24 * 14 * 1000; // 14일
+	private final long refreshTokenValidTime = 60L * 60 * 24 * 14 * 1000; /**
+	 * Generates a JWT access token containing the user's ID, username, and role, signed with the secret key and valid for one hour.
+	 *
+	 * @param user the user for whom the access token is generated
+	 * @return a signed JWT access token as a string
+	 */
 
 	public String createAccessToken(UserDto user) {
 
@@ -42,6 +47,14 @@ public class AuthTokenProvider {
 			.compact();
 	}
 
+	/**
+	 * Generates a JWT refresh token for the specified user with a 14-day expiration.
+	 *
+	 * The token includes the user's ID and username as claims and is signed using the configured secret key.
+	 *
+	 * @param user the user for whom the refresh token is generated
+	 * @return a signed JWT refresh token string
+	 */
 	public String createRefreshToken(UserDto user) {
 
 		SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
@@ -56,6 +69,12 @@ public class AuthTokenProvider {
 			.compact();
 	}
 
+	/**
+	 * Parses a JWT token and returns its claims.
+	 *
+	 * @param token the JWT token to parse
+	 * @return the claims contained within the token
+	 */
 	public Claims parseToken(String token) {
 
 		SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
@@ -63,6 +82,12 @@ public class AuthTokenProvider {
 		return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
 	}
 
+	/**
+	 * Returns the remaining validity period of a JWT token in seconds.
+	 *
+	 * @param token the JWT token to check
+	 * @return the number of seconds until the token expires
+	 */
 	public long getExpiration(String token) {
 
 		Claims claims = parseToken(token);
@@ -72,6 +97,12 @@ public class AuthTokenProvider {
 
 	}
 
+	/**
+	 * Validates a JWT token by checking its signature and expiration date.
+	 *
+	 * @param token the JWT token to validate
+	 * @return true if the token is valid and not expired; false otherwise
+	 */
 	public boolean validateToken(String token) {
 		try {
 			SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));

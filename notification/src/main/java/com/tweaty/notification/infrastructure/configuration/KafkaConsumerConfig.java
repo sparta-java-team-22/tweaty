@@ -18,6 +18,19 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 @Configuration
 public class KafkaConsumerConfig {
 
+	/**
+	 * Creates and configures a Kafka {@link ConsumerFactory} for consuming messages with String keys and JSON values.
+	 *
+	 * <p>
+	 * The consumer factory is set up to connect to a local Kafka broker, disables automatic offset commits,
+	 * and uses {@link StringDeserializer} for keys. For values, it uses {@link ErrorHandlingDeserializer}
+	 * wrapping a {@link JsonDeserializer}, enabling robust handling of JSON payloads and deserialization errors.
+	 * Type mappings are provided to map notification DTOs from different packages to a unified DTO class,
+	 * and all packages are trusted for deserialization.
+	 * </p>
+	 *
+	 * @return a configured {@link ConsumerFactory} for Kafka consumers handling notification messages
+	 */
 	@Bean
 	public ConsumerFactory<String, Object> consumerFactory() {
 
@@ -37,6 +50,11 @@ public class KafkaConsumerConfig {
 
 	}
 
+	/**
+	 * Creates and configures a Kafka listener container factory for concurrent message consumption.
+	 *
+	 * @return a ConcurrentKafkaListenerContainerFactory using the configured consumer factory
+	 */
 	@Bean
 	public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory() {
 		ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();

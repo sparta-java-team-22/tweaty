@@ -46,6 +46,12 @@ public class AuthService {
 	private final StringRedisTemplate redisTemplate;
 	private final KafkaTemplate<String, Object> kafkaTemplate;
 
+	/**
+	 * Registers a new user, encrypts their password, and sends a signup notification via Kafka.
+	 *
+	 * @param requestDto the user signup request containing registration details
+	 * @return the response containing the registered user's information
+	 */
 	public UserResponseDto userSignUp(UserSignUpRequestDto requestDto) {
 
 		String encryptedPassword = passwordEncoder.encode(requestDto.getPassword());
@@ -77,6 +83,13 @@ public class AuthService {
 
 	}
 
+	/**
+	 * Registers a new owner account, uploads the business license file to S3, and sends a signup notification via Kafka.
+	 *
+	 * @param requestDto the owner signup request containing user and business details
+	 * @param file the business license file to be uploaded
+	 * @return the response containing the registered owner's information
+	 */
 	public OwnerResponseDto ownerSignUp(OwnerSignUpRequestDto requestDto, MultipartFile file) {
 
 		// 사업자 등록증 업로드
@@ -111,6 +124,16 @@ public class AuthService {
 
 	}
 
+	/**
+	 * Authenticates a user and issues JWT access and refresh tokens.
+	 *
+	 * Validates the provided credentials, generates tokens upon successful authentication, stores the refresh token in Redis with its expiration, and returns a response containing tokens and user information.
+	 *
+	 * @param requestDto the login request containing username and password
+	 * @return a response with access token, refresh token, token type, expiration, and user details
+	 * @throws InvalidPasswordException if the password is incorrect
+	 * @throws RuntimeException if storing the refresh token in Redis fails
+	 */
 	public LoginResponseDto login(LoginRequestDto requestDto) {
 
 		UserDto user = userServiceClient.getUserByUsername(requestDto.getUsername(), "true");
@@ -140,6 +163,13 @@ public class AuthService {
 
 	}
 
+	/**
+	 * Updates a user's password after verifying the current password.
+	 *
+	 * @param username the username of the user whose password is to be updated
+	 * @param requestDto contains the current and new passwords for the update
+	 * @throws InvalidPasswordException if the current password does not match the user's existing password
+	 */
 	public void updatePassword(String username, PasswordUpdateRequestDto requestDto) {
 
 		UserDto user = userServiceClient.getUserByUsername(username, "true");
@@ -153,6 +183,17 @@ public class AuthService {
 
 	}
 
+	/**
+	 * Issues new access and refresh tokens after validating the provided refresh token and access token header.
+	 *
+	 * Validates the format of the authorization header and the refresh token, checks the refresh token against the stored value in Redis, and retrieves the user information. Generates new tokens, updates the refresh token in Redis, and returns a response containing the new tokens and user details.
+	 *
+	 * @param authHeader the HTTP Authorization header containing the access token in "Bearer" format
+	 * @param refreshToken the JWT refresh token to be validated and reissued
+	 * @return a LoginResponseDto containing the new access token, refresh token, token type, expiration, and user information
+	 * @throws IllegalArgumentException if the authorization header or refresh token is invalid, or if the refresh token does not match the stored value
+	 * @throws RuntimeException if storing the new refresh token in Redis fails
+	 */
 	public LoginResponseDto reissueToken(String authHeader, String refreshToken) {
 
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -200,6 +241,12 @@ public class AuthService {
 
 	}
 
+	/**
+	 * Logs out a user by invalidating their refresh token and blacklisting the access token.
+	 *
+	 * @param authHeader the HTTP Authorization header containing the Bearer access token
+	 * @throws IllegalArgumentException if the authorization header is missing, improperly formatted, or the token is invalid
+	 */
 	public void logout(String authHeader) {
 
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {

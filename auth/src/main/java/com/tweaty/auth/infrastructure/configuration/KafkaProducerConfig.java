@@ -15,6 +15,11 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 @Configuration
 public class KafkaProducerConfig {
 
+	/**
+	 * Creates and configures a Kafka {@link ProducerFactory} for producing messages with String keys and JSON-serialized values.
+	 *
+	 * @return a ProducerFactory configured with local Kafka bootstrap servers and appropriate serializers
+	 */
 	@Bean
 	public ProducerFactory<String, Object> producerFactory() {
 		Map<String, Object> config = new HashMap<>();
@@ -24,6 +29,11 @@ public class KafkaProducerConfig {
 		return new DefaultKafkaProducerFactory<>(config);
 	}
 
+	/**
+	 * Creates a KafkaTemplate bean for sending messages with String keys and Object values.
+	 *
+	 * @return a KafkaTemplate configured with the application's producer factory
+	 */
 	@Bean
 	public KafkaTemplate<String, Object> kafkaTemplate() {
 		return new KafkaTemplate<>(producerFactory());
