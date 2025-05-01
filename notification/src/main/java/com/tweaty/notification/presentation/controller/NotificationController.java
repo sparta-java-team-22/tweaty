@@ -123,7 +123,7 @@ public class NotificationController {
 
 		notificationService.deleteNotification(notiId, id);
 
-		return SuccessResponse.successMessageOnly("알림 전체 삭제 성공");
+		return SuccessResponse.successMessageOnly("알림 삭제 성공");
 	}
 
 	//알림 전체 삭제

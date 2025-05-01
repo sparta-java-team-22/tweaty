@@ -19,10 +19,10 @@ public interface JpaNotificationRepository extends JpaRepository<Notification, U
 	Page<Notification> findByReceiverIdAndNotiChannelAndNotiStatus(UUID receiverId, NotiChannel notiChannel, NotiStatus notiStatus, Pageable pageable);
 
 	@Modifying(clearAutomatically = true)
-	@Query("UPDATE Notification n SET n.isRead = true WHERE n.receiverId = :id AND n.isRead = false")
+	@Query("UPDATE Notification n SET n.isRead = true WHERE n.receiverId = :id AND n.isRead = false AND n.notiChannel = 'WEB'")
 	int markAllAsReadById(@Param("id") UUID id);
 
 	@Modifying(clearAutomatically = true)
-	@Query("UPDATE Notification n SET n.isDeleted = true WHERE n.receiverId = :id AND n.isDeleted = false")
+	@Query("UPDATE Notification n SET n.isDeleted = true WHERE n.receiverId = :id AND n.isDeleted = false AND n.notiChannel = 'WEB'")
 	void deleteAllNotification(@Param("id") UUID id);
 }

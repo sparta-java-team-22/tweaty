@@ -9,17 +9,17 @@ import domain.TargetType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotificationRequestDto {
 
 	private UUID receiverId;
 	private TargetType targetType; //RESERVATION, WAITING, SIGNUP
-	// private UUID targetId;
 	private Set<NotiChannel> notiChannel; //WEB, EMAIL
 	private NotiType notiType; //CREATED,UPDATED, CANCELLED, REMINDER, SIGNUP
-	// private NotiStatus notiStatus; //PENDING, SENT, FAILED
 
 }
