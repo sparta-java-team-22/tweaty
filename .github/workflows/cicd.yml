@@ -122,7 +122,7 @@ jobs:
         # 8. ECR 로그인
         - name: Login to ECR
           run: |
-            aws ecr get-login-password | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
 
         # 9. Docker Image 빌드 및 ECR push
         - name: Build and push Docker image to ECR
