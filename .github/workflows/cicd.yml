@@ -126,8 +126,14 @@ jobs:
 
         # 9. Docker Image 빌드 및 ECR push
         - name: Build and push Docker image to ECR
-          working-directory: ${{ matrix.service.folder }}
+          if: ${{ contains(env.services_to_build, matrix.service.folder) }}
           run: |
+            echo "JAR 파일 검색..."
+            find ${{ matrix.service.folder }}/build -name "*.jar" -type f
+
+            cp Dockerfile ${{ matrix.service.folder }}/
+            
+            cd ${{ matrix.service.folder }}
             docker build -t ${{ secrets.ECR_REGISTRY }}/${{ matrix.service.name }}:latest .
             docker push ${{ secrets.ECR_REGISTRY }}/${{ matrix.service.name }}:latest
 
