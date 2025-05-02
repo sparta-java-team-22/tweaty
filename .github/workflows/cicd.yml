@@ -6,6 +6,7 @@ on:
 
 jobs:
   build-and-deploy:
+    name: build
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -31,7 +32,7 @@ jobs:
           - name: notification-service
             folder: notification
 
-      steps:
+    steps:
         # 1. Git 저장소 checkout
         - name: Checkout
           uses: actions/checkout@v4
