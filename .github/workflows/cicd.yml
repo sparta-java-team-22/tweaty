@@ -1,0 +1,175 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - name: eureka-service
+            folder: eureka
+          - name: gateway-service
+            folder: gateway
+          - name: auth-service
+            folder: auth
+          - name: user-service
+            folder: user
+          - name: store-service
+            folder: store
+          - name: reservation-service
+            folder: reservation
+          - name: payment-service
+            folder: payment
+          - name: coupon-service
+            folder: coupon
+          - name: promotion-service
+            folder: promotion
+          - name: notification-service
+            folder: notification
+
+      steps:
+        # 1. Git 저장소 checkout
+        - name: Checkout
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 2
+
+        # 2. 변경된 service 감지
+        - name: Detect Changed Services
+          id: detect_changes
+          run: |
+            CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+            echo "Changed files: $CHANGED_FILES"
+            
+            SERVICES_TO_BUILD=""
+            
+            for CHANGED_FILE in $CHANGED_FILES; do
+              FOLDER=$(echo "$CHANGED_FILE" | sed 's/\/.*//')
+            
+              if [[ ! "$SERVICES_TO_BUILD" =~ "$FOLDER" ]]; then
+              SERVICES_TO_BUILD="$SERVICES_TO_BUILD $FOLDER"
+              fi
+            done
+            
+            echo "Folders to build: $SERVICES_TO_BUILD"
+            echo "services_to_build=$SERVICES_TO_BUILD" >> $GITHUB_ENV
+
+        # 3. 변경되지 않은 서비스는 skip
+        - name: Skip Unchanged Services
+          if: ${{ !contains(env.services_to_build, matrix.service.folder) }}
+          run: |
+            echo "Skipping service: ${{ matrix.service.name }}"
+            exit 0
+
+        # 4. JDK 17 설치
+        - name: Set up JDK 17
+          uses: actions/setup-java@v3
+          with:
+            java-version: '17'
+            distribution: 'temurin'
+
+        # 5. application.yml 설정
+        - name: Inject application.yml
+          if: ${{ contains(env.services_to_build, matrix.service.folder) }}
+          run: |
+            if [ "${{ matrix.service.name }}" == "eureka-service" ]; then
+            echo "${{ secrets.EUREKA_SERVER_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            elif [ "${{ matrix.service.name }}" == "gateway-service" ]; then
+            echo "${{ secrets.GATEWAY_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            elif [ "${{ matrix.service.name }}" == "auth-service" ]; then
+            echo "${{ secrets.AUTH_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            elif [ "${{ matrix.service.name }}" == "user-service" ]; then
+            echo "${{ secrets.USER_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            elif [ "${{ matrix.service.name }}" == "store-service" ]; then
+            echo "${{ secrets.STORE_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            elif [ "${{ matrix.service.name }}" == "reservation-service" ]; then
+            echo "${{ secrets.RESERVATION_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            elif [ "${{ matrix.service.name }}" == "payment-service" ]; then
+            echo "${{ secrets.PAYMENT_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            elif [ "${{ matrix.service.name }}" == "coupon-service" ]; then
+            echo "${{ secrets.COUPON_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            elif [ "${{ matrix.service.name }}" == "promotion-service" ]; then
+            echo "${{ secrets.PROMOTION_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            elif [ "${{ matrix.service.name }}" == "notification-service" ]; then
+            echo "${{ secrets.NOTIFICATION_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            fi
+
+        # 6. Gradle 빌드 (테스트 제외)
+        - name: Build with Gradle
+          if: ${{ contains(env.services_to_build, matrix.service.folder) }}
+          run: |
+            cd ${{ matrix.service.folder }}
+            chmod +x gradlew
+            ./gradlew clean
+            ./gradlew build -x test --no-daemon
+
+        # 7. AWS 자격증명 설정
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            role-to-assume: ${{ secrets.AWS_ROLE_NAME }}
+            aws-region: ${{ env.AWS_REGION }}
+
+        # 8. ECR 로그인
+        - name: Login to ECR
+          run: |
+            aws ecr get-login-password | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+
+        # 9. Docker Image 빌드 및 ECR push
+        - name: Build and push Docker image to ECR
+          working-directory: ${{ matrix.service.folder }}
+          run: |
+            docker build -t ${{ secrets.ECR_REGISTRY }}/${{ matrix.service.name }}:latest .
+            docker push ${{ secrets.ECR_REGISTRY }}/${{ matrix.service.name }}:latest
+
+        # 10. EC2에 접속 및 배포
+        - name: Deploy to EC2
+          if: ${{ contains(env.services_to_build, matrix.service.folder) }}
+          uses: appleboy/ssh-action@v0.1.6
+          env:
+            SERVICE_PORT: ${{
+              matrix.service.name == 'eureka-service' && secrets.EUREKA_PORT ||
+              matrix.service.name == 'gateway-service' && secrets.GATEWAY_PORT ||
+              matrix.service.name == 'auth-service' && secrets.AUTH_PORT ||
+              matrix.service.name == 'user-service' && secrets.USER_PORT ||
+              matrix.service.name == 'store-service' && secrets.STORE_PORT ||
+              matrix.service.name == 'reservation-service' && secrets.RESERVATION_PORT ||
+              matrix.service.name == 'payment-service' && secrets.PAYMENT_PORT ||
+              matrix.service.name == 'coupon-service' && secrets.COUPON_PORT ||
+              matrix.service.name == 'promotion-service' && secrets.PROMOTION_PORT ||
+              matrix.service.name == 'notification-service' && secrets.NOTIFICATION_PORT }}
+            with:
+              host: ${{ secrets.PRIVATE_HOST }}
+              username: ${{ secrets.PRIVATE_USER }}
+              key: ${{ secrets.PRIVATE_SSH_KEY }}
+              proxy_host: ${{ secrets.BASTION_HOST }}
+              proxy_username: ${{ secrets.BASTION_USER }}
+              proxy_key: ${{ secrets.BASTION_SSH_KEY }}
+              debug: true
+              script_stop: true
+              script: |
+                cd /home/ubuntu/tweaty
+                
+                echo "Logging in to ECR..."
+                DOCKER_CONFIG=/dev/null aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+                
+                echo "Stopping existing container..."
+                docker stop ${{ matrix.service.name }} || true
+                docker rm ${{ matrix.service.name }} || true
+                
+                echo "Cleaning up old images..."
+                docker image prune -af || true
+                
+                echo "Pulling latest image..."
+                docker pull ${{ secrets.ECR_REGISTRY }}/${{ matrix.service.name }}:latest
+                
+                echo "Running container..."
+                docker run -d --name ${{ matrix.service.name }} \
+                  --env-file /home/ubuntu/.env \
+                  --network shared-net \
+                  -p ${{ env.SERVICE_PORT }}:${{ env.SERVICE_PORT }} \
+                  ${{ secrets.ECR_REGISTRY }}/${{ matrix.service.name }}:latest
