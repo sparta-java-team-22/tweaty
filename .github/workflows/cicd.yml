@@ -143,7 +143,7 @@ jobs:
               matrix.service.name == 'coupon-service' && secrets.COUPON_PORT ||
               matrix.service.name == 'promotion-service' && secrets.PROMOTION_PORT ||
               matrix.service.name == 'notification-service' && secrets.NOTIFICATION_PORT }}
-            with:
+          with:
               host: ${{ secrets.PRIVATE_HOST }}
               username: ${{ secrets.PRIVATE_USER }}
               key: ${{ secrets.PRIVATE_SSH_KEY }}
