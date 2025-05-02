@@ -39,7 +39,6 @@ public class NotificationService {
 	private final EmailNotificationSender emailNotificationSender;
 	private final UserServiceClient userServiceClient;
 
-
 	public void createSignupNotification(NotificationRequestDto requestDto) {
 
 		for(NotiChannel notiChannel : requestDto.getNotiChannel()) {

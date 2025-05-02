@@ -30,6 +30,7 @@ ext {
 
 dependencies {
     implementation project(":common")
+    implementation 'org.springframework.kafka:spring-kafka'
     implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"
     annotationProcessor "com.querydsl:querydsl-apt:${querydslVersion}:jakarta"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
