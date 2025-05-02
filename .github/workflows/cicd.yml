@@ -160,7 +160,7 @@ jobs:
                 cd /home/ubuntu/tweaty
                 
                 echo "Logging in to ECR..."
-                DOCKER_CONFIG=/dev/null aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+                DOCKER_CONFIG=/dev/null aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
                 
                 echo "Stopping existing container..."
                 docker stop ${{ matrix.service.name }} || true
