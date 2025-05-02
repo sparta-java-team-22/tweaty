@@ -12,6 +12,8 @@ jobs:
   build-and-deploy:
     name: build
     runs-on: ubuntu-latest
+    env:
+      ACTIONS_STEP_DEBUG: true
     strategy:
       matrix:
         service:
