@@ -182,5 +182,5 @@ jobs:
                 docker run -d --name ${{ matrix.service.name }} \
                   --env-file /home/ubuntu/.env \
                   --network shared-net \
-                  -p ${{ env.SERVICE_PORT }}:${{ env.SERVICE_PORT }} \
+                  -p ${{ secrets.SERVICE_PORT }}:${{ secrets.SERVICE_PORT }} \
                   ${{ secrets.ECR_REGISTRY }}/${{ matrix.service.name }}:latest
