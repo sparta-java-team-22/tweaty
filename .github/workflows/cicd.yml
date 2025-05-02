@@ -81,7 +81,7 @@ jobs:
 
         # 5. application.yml 설정
         - name: Inject application.yml
-          if: ${{ contains(env.services_to_build, matrix.service.folder) }}
+          # if: ${{ contains(env.services_to_build, matrix.service.folder) }}
           run: |
             if [ "${{ matrix.service.name }}" == "eureka-service" ]; then
             echo "${{ secrets.EUREKA_SERVER_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
@@ -107,7 +107,7 @@ jobs:
 
         # 6. Gradle 빌드 (테스트 제외)
         - name: Build with Gradle
-          if: ${{ contains(env.services_to_build, matrix.service.folder) }}
+          # if: ${{ contains(env.services_to_build, matrix.service.folder) }}
           run: |
             cd ${{ matrix.service.folder }}
             chmod +x gradlew
@@ -141,7 +141,7 @@ jobs:
 
         # 10. EC2에 접속 및 배포
         - name: Deploy to EC2
-          if: ${{ contains(env.services_to_build, matrix.service.folder) }}
+          # if: ${{ contains(env.services_to_build, matrix.service.folder) }}
           uses: appleboy/ssh-action@v0.1.6
           env:
             SERVICE_PORT: ${{
