@@ -149,7 +149,7 @@ jobs:
             COPY ${JAR_FILE} app.jar
             
             # Add health check
-            HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://localhost:$SERVICE_PORT/actuator/health || exit 1
+            HEALTHCHECK --interval=30s --timeout=3s --retries=5 CMD wget -qO- http://localhost:$SERVICE_PORT/actuator/health || exit 1
             
             ENTRYPOINT ["java", "-Dspring.profiles.active=dev", "-jar", "app.jar"]
             EOF
@@ -207,9 +207,13 @@ jobs:
                 
                 echo "Pulling latest image..."
                 docker pull $ECR_REGISTRY/$SERVICE_NAME:latest
+
+                echo "Create network.."
+                docker network create tweaty-network || true
                 
                 echo "Running container..."
                 docker run -d --name $SERVICE_NAME \
-                  --network bridge \
+                  --network tweaty-network \
+                  --restart unless-stopped \
                   -p $SERVICE_PORT:$SERVICE_PORT \
                   $ECR_REGISTRY/$SERVICE_NAME:latest
