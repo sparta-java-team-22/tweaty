@@ -142,8 +142,6 @@ jobs:
           run: |
             echo "JAR 파일 검색..."
             find ${{ matrix.service.folder }}/build -name "*.jar" -type f
-
-            cp Dockerfile ${{ matrix.service.folder }}/
             
             cd ${{ matrix.service.folder }}
             docker build -t ${{ secrets.ECR_REGISTRY }}/${{ matrix.service.name }}:latest .
@@ -174,9 +172,7 @@ jobs:
               proxy_key: ${{ secrets.BASTION_SSH_KEY }}
               debug: true
               script_stop: true
-              script: |
-                cd /home/ubuntu/tweaty
-                
+              script: |                
                 echo "Logging in to ECR..."
                 DOCKER_CONFIG=/dev/null aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
                 
