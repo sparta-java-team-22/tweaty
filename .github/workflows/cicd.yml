@@ -114,6 +114,10 @@ jobs:
             elif [ "${{ matrix.service.name }}" == "notification-service" ]; then
             echo "${{ secrets.NOTIFICATION_APPLICATION_DEV_YML }}" | base64 --decode > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
             fi
+            
+            echo "spring:
+                    profiles:
+                      active: dev" > ${{ matrix.service.folder }}/src/main/resources/application.yml
 
         # 6. Gradle 빌드 (테스트 제외)
         - name: Build with Gradle
@@ -135,6 +139,20 @@ jobs:
         - name: Login to ECR
           run: |
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+
+        - name: Create or Update Dockerfile
+          run: |
+            cat > ${{ matrix.service.folder }}/Dockerfile << 'EOF'
+            FROM openjdk:17-jdk-slim
+            
+            ARG JAR_FILE=build/libs/*.jar
+            COPY ${JAR_FILE} app.jar
+            
+            # Add health check
+            HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://localhost:$SERVICE_PORT/actuator/health || exit 1
+            
+            ENTRYPOINT ["java", "-Dspring.profiles.active=dev", "-jar", "app.jar"]
+            EOF
 
         # 9. Docker Image 빌드 및 ECR push
         - name: Build and push Docker image to ECR
