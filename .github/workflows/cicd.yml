@@ -91,33 +91,33 @@ jobs:
 
         # 5. application.yml 설정
         - name: Inject application.yml
-          # if: ${{ contains(env.services_to_build, matrix.service.folder) }}
+          if: ${{ contains(env.services_to_build, matrix.service.folder) }}
           run: |
             if [ "${{ matrix.service.name }}" == "eureka-service" ]; then
-            echo "${{ secrets.EUREKA_SERVER_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            echo "${{ secrets.EUREKA_SERVER_APPLICATION_DEV_YML }}" | base64 --decode > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
             elif [ "${{ matrix.service.name }}" == "gateway-service" ]; then
-            echo "${{ secrets.GATEWAY_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            echo "${{ secrets.GATEWAY_APPLICATION_DEV_YML }}" | base64 --decode > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
             elif [ "${{ matrix.service.name }}" == "auth-service" ]; then
-            echo "${{ secrets.AUTH_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            echo "${{ secrets.AUTH_APPLICATION_DEV_YML }}" | base64 --decode > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
             elif [ "${{ matrix.service.name }}" == "user-service" ]; then
-            echo "${{ secrets.USER_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            echo "${{ secrets.USER_APPLICATION_DEV_YML }}" | base64 --decode > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
             elif [ "${{ matrix.service.name }}" == "store-service" ]; then
-            echo "${{ secrets.STORE_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            echo "${{ secrets.STORE_APPLICATION_DEV_YML }}" | base64 --decode > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
             elif [ "${{ matrix.service.name }}" == "reservation-service" ]; then
-            echo "${{ secrets.RESERVATION_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            echo "${{ secrets.RESERVATION_APPLICATION_DEV_YML }}" | base64 --decode > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
             elif [ "${{ matrix.service.name }}" == "payment-service" ]; then
-            echo "${{ secrets.PAYMENT_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            echo "${{ secrets.PAYMENT_APPLICATION_DEV_YML }}" | base64 --decode > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
             elif [ "${{ matrix.service.name }}" == "coupon-service" ]; then
-            echo "${{ secrets.COUPON_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            echo "${{ secrets.COUPON_APPLICATION_DEV_YML }}" | base64 --decode > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
             elif [ "${{ matrix.service.name }}" == "promotion-service" ]; then
-            echo "${{ secrets.PROMOTION_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            echo "${{ secrets.PROMOTION_APPLICATION_DEV_YML }}" | base64 --decode > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
             elif [ "${{ matrix.service.name }}" == "notification-service" ]; then
-            echo "${{ secrets.NOTIFICATION_APPLICATION_DEV_YML }}" > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
+            echo "${{ secrets.NOTIFICATION_APPLICATION_DEV_YML }}" | base64 --decode > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
             fi
 
         # 6. Gradle 빌드 (테스트 제외)
         - name: Build with Gradle
-          # if: ${{ contains(env.services_to_build, matrix.service.folder) }}
+          if: ${{ contains(env.services_to_build, matrix.service.folder) }}
           run: |
             cd ${{ matrix.service.folder }}
             chmod +x gradlew
@@ -192,7 +192,6 @@ jobs:
                 
                 echo "Running container..."
                 docker run -d --name ${{ matrix.service.name }} \
-                  --env-file /home/ubuntu/.env \
-                  --network shared-net \
+                  --network bridge \
                   -p ${{ secrets.SERVICE_PORT }}:${{ secrets.SERVICE_PORT }} \
                   ${{ secrets.ECR_REGISTRY }}/${{ matrix.service.name }}:latest
