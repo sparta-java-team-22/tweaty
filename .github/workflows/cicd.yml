@@ -152,6 +152,9 @@ jobs:
           # if: ${{ contains(env.services_to_build, matrix.service.folder) }}
           uses: appleboy/ssh-action@v0.1.6
           env:
+            ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+            AWS_REGION: ${{ secrets.AWS_REGION }}
+            SERVICE_NAME: ${{ matrix.service.name }}
             SERVICE_PORT: ${{
               matrix.service.name == 'eureka-service' && secrets.EUREKA_PORT ||
               matrix.service.name == 'gateway-service' && secrets.GATEWAY_PORT ||
@@ -172,22 +175,23 @@ jobs:
               proxy_key: ${{ secrets.BASTION_SSH_KEY }}
               debug: true
               script_stop: true
+              envs: ECR_REGISTRY,AWS_REGION,SERVICE_NAME,SERVICE_PORT
               script: |                
                 echo "Logging in to ECR..."
-                aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+                aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
                 
                 echo "Stopping existing container..."
-                docker stop ${{ matrix.service.name }} || true
-                docker rm ${{ matrix.service.name }} || true
+                docker stop $SERVICE_NAME || true
+                docker rm $SERVICE_NAME || true
                 
                 echo "Cleaning up old images..."
                 docker image prune -af || true
                 
                 echo "Pulling latest image..."
-                docker pull ${{ secrets.ECR_REGISTRY }}/${{ matrix.service.name }}:latest
+                docker pull $ECR_REGISTRY/$SERVICE_NAME:latest
                 
                 echo "Running container..."
-                docker run -d --name ${{ matrix.service.name }} \
+                docker run -d --name $SERVICE_NAME \
                   --network bridge \
-                  -p ${{ secrets.SERVICE_PORT }}:${{ secrets.SERVICE_PORT }} \
-                  ${{ secrets.ECR_REGISTRY }}/${{ matrix.service.name }}:latest
+                  -p $SERVICE_PORT:$SERVICE_PORT \
+                  $ECR_REGISTRY/$SERVICE_NAME:latest
