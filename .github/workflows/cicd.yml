@@ -91,7 +91,7 @@ jobs:
 
         # 5. application.yml 설정
         - name: Inject application.yml
-          if: ${{ contains(env.services_to_build, matrix.service.folder) }}
+          #if: ${{ contains(env.services_to_build, matrix.service.folder) }}
           run: |
             if [ "${{ matrix.service.name }}" == "eureka-service" ]; then
             echo "${{ secrets.EUREKA_SERVER_APPLICATION_DEV_YML }}" | base64 --decode > ${{ matrix.service.folder }}/src/main/resources/application-dev.yml
