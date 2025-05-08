@@ -1,7 +1,6 @@
 spring:
-
   datasource:
-    url: jdbc:postgresql://localhost:5432/${DB_NAME}
+    url: jdbc:postgresql://tweaty-db:5432/${DB_NAME}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -12,13 +11,6 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-  #        format_sql: true
-  #        show_sql: true
-
-  data:
-    redis:
-      host: payment-redis
-      port: 6379
 
 
   kafka:
@@ -33,14 +25,12 @@ spring:
       properties:
         spring.json.trusted.packages: "*"
 
-
-
 server:
   port: 19097
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:19090/eureka/
+      defaultZone: http://eureka-service:19090/eureka/
       register-with-eureka: true
       fetch-registry: true

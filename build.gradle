@@ -29,6 +29,18 @@ subprojects {
         implementation 'org.projectlombok:lombok'
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'
+
+        // Zipkin 관련 의존성
+        implementation 'io.micrometer:micrometer-observation'
+        implementation 'io.micrometer:micrometer-tracing'
+        implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+        implementation 'io.zipkin.reporter2:zipkin-sender-urlconnection'
+        implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+
+
+        implementation 'org.springframework.kafka:spring-kafka'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'io.micrometer:micrometer-registry-prometheus'
     }
 
     test {

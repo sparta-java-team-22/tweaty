@@ -16,6 +16,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -80,7 +81,6 @@ public class Payment extends BaseEntity {
 		this.status = PaymentType.REFUNDED;
 	}
 
-
 	public static Payment toReadyEntity(PaymentCreateEvent event) {
 		return Payment.builder()
 			.userId(event.getUserId())
@@ -101,6 +101,10 @@ public class Payment extends BaseEntity {
 			.method(MethodType.valueOf(event.getMethod()))
 			.couponId(event.getCouponId())
 			.build();
+	}
+
+	public boolean isCompleted() {
+		return this.status == PaymentType.SUCCESS || this.status == PaymentType.FAIL;
 	}
 
 }

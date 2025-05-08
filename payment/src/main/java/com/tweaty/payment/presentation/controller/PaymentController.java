@@ -19,6 +19,7 @@ import com.tweaty.payment.application.service.PaymentService;
 import com.tweaty.payment.domain.entity.Payment;
 import com.tweaty.payment.domain.entity.Refund;
 import com.tweaty.payment.domain.service.PaymentDomainService;
+
 import com.tweaty.payment.infrastucture.kafka.event.PaymentCreateEvent;
 import com.tweaty.payment.infrastucture.kafka.event.RefundCreateEvent;
 import com.tweaty.payment.infrastucture.kafka.producer.KafkaPaymentProducer;
@@ -47,7 +48,6 @@ public class PaymentController {
 	public ResponseEntity<?> createPayment(@RequestHeader("X-USER-ID") UUID userId,
 		@RequestHeader("X-USER-ROLE") String role, @RequestBody PaymentRequestDto req,
 		@PathVariable UUID reservationId) {
-		// 결제 객체 생성(결제요청 상태)
 		Payment payment = Payment.toReadyEntity(req, reservationId, userId);
 		paymentDomainService.saveReadyPayment(payment);
 
@@ -56,17 +56,77 @@ public class PaymentController {
 		return SuccessResponse.successWith(200, "결제 생성 성공", paymentIdDto);
 	}
 
+	// 비관적락 적용
 	@PostMapping("/{reservationId}")
 	public ResponseEntity<?> createKafkaPayment(@RequestHeader("X-USER-ID") UUID userId,
-		@RequestBody PaymentRequestDto req,
+		@RequestHeader("X-USER-ROLE") String role, @RequestBody PaymentRequestDto req,
 		@PathVariable UUID reservationId) {
-		// 결제 객체 생성(결제요청 상태)
 		Payment payment = Payment.toReadyEntity(req, reservationId, userId);
 		paymentDomainService.saveReadyPayment(payment);
 		kafkaPaymentProducer.sendCreateEvent(PaymentCreateEvent.from(payment));
+
 		PaymentIdDto paymentIdDto = new PaymentIdDto(payment.getId());
+
 		return ResponseEntity.ok(paymentIdDto);
 	}
+
+	// // REDIS + 분산락적용
+	@PostMapping("/{reservationId}/redis")
+	public ResponseEntity<?> createKafkaPaymentV2(@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role, @RequestBody PaymentRequestDto req,
+		@PathVariable UUID reservationId) {
+
+		Payment payment = paymentDomainService.toReadyPayment(req, userId, reservationId);
+		kafkaPaymentProducer.sendCreateEvenByRedisson(PaymentCreateEvent.from(payment));
+		PaymentIdDto paymentIdDto = new PaymentIdDto(payment.getId());
+
+		return ResponseEntity.ok(paymentIdDto);
+	}
+
+
+
+
+
+	// // REDIS + 분산락적용Test
+	@PostMapping("/{reservationId}/redis/test")
+	public ResponseEntity<?> createKafkaPaymentV3Test(@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role, @RequestBody PaymentRequestDto req,
+		@PathVariable UUID reservationId) {
+		Payment payment = paymentDomainService.toReadyPayment(req, userId, reservationId);
+		kafkaPaymentProducer.sendCreateEvenByRedisson(PaymentCreateEvent.from(payment));
+		PaymentIdDto paymentIdDto = new PaymentIdDto(payment.getId());
+
+		return ResponseEntity.ok(paymentIdDto);
+	}
+
+
+	// // 비관적락 적용Test
+	@PostMapping("/{reservationId}/op/test")
+	public ResponseEntity<?> createKafkaPaymentByOpV3Test(@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role, @RequestBody PaymentRequestDto req,
+		@PathVariable UUID reservationId) {
+		Payment payment = paymentDomainService.toReadyPayment(req, userId, reservationId);
+		kafkaPaymentProducer.sendCreateEvent(PaymentCreateEvent.from(payment));
+		PaymentIdDto paymentIdDto = new PaymentIdDto(payment.getId());
+
+		return ResponseEntity.ok(paymentIdDto);
+	}
+
+
+
+
+	// // 중복 Test
+	@PostMapping("/{reservationId}/test")
+	public ResponseEntity<?> createKafkaPaymentByOpV4Test(@RequestHeader("X-USER-ID") UUID userId,
+		@RequestHeader("X-USER-ROLE") String role, @RequestBody PaymentRequestDto req,
+		@PathVariable UUID reservationId) {
+		Payment payment = paymentDomainService.toReadyPayment(req, userId, reservationId);
+		kafkaPaymentProducer.sendCreateEventNature(PaymentCreateEvent.from(payment));
+		PaymentIdDto paymentIdDto = new PaymentIdDto(payment.getId());
+
+		return ResponseEntity.ok(paymentIdDto);
+	}
+
 
 	@GetMapping
 	public ResponseEntity<?> getPaymentList(@RequestHeader("X-USER-ID") UUID userId,
@@ -98,8 +158,6 @@ public class PaymentController {
 
 		kafkaRefundProducer.sendRefundEvent(RefundCreateEvent.from(refund));
 
-		RefundIdDto refundIdDto = new RefundIdDto(refund.getId());
-
 		return ResponseEntity.ok("환불 요청이 접수되었습니다.");
 	}
 
@@ -112,5 +170,21 @@ public class PaymentController {
 
 		return SuccessResponse.successWith(200, "환불 내역조회 성공", RefundListResponse.from(refundPage));
 	}
+
+
+	@PostMapping("/pessimistic")
+	public ResponseEntity<Void> pessimistic(@RequestParam UUID id) {
+		paymentDomainService.testWithPessimisticLock(id);
+		return ResponseEntity.ok().build();
+	}
+
+	@PostMapping("/redisson")
+	public ResponseEntity<Void> redisson(@RequestParam UUID id) {
+		paymentDomainService.testWithRedissonLock(id);
+		return ResponseEntity.ok().build();
+	}
+
+
+
 
 }

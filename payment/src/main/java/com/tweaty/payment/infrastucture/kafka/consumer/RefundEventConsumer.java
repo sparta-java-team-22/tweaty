@@ -38,15 +38,15 @@ public class RefundEventConsumer {
 	private final CouponClient couponClient;
 
 	@KafkaListener(topics = "refund-success", groupId = "refund-consumer")
-	public void consumePaymentSuccess(PaymentSuccessEvent event) {
-		log.info("결제 성공 이벤트 수신: {}", event);
+	public void consumePaymentSuccess(RefundSuccessEvent event) {
+		log.info("환불 성공 이벤트 수신: {}", event);
 
 		// 여기서 알림 전송, 포인트 적립 등 처리
 	}
 
 	@KafkaListener(topics = "refund-failed", groupId = "alert-service")
-	public void consumePaymentFailed(PaymentFailedEvent event) {
-		log.warn("결제 실패 이벤트 수신: {}", event);
+	public void consumePaymentFailed(RefundFailedEvent event) {
+		log.warn("환불 실패 이벤트 수신: {}", event);
 		// 알림 전송, 로그 저장, 슬랙 메시지 발송 등 처리 가능
 	}
 

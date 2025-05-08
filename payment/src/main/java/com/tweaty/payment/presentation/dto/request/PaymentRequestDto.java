@@ -8,6 +8,7 @@ import com.tweaty.payment.domain.entity.Payment;
 import com.tweaty.payment.domain.entity.PaymentType;
 
 import jakarta.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
@@ -15,6 +16,7 @@ import lombok.Getter;
 @Getter
 @Data
 @Builder
+@AllArgsConstructor
 public class PaymentRequestDto {
 
 	@NotEmpty
