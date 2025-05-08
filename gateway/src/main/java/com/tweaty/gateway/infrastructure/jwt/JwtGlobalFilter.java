@@ -2,6 +2,7 @@ package com.tweaty.gateway.infrastructure.jwt;
 
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import reactor.core.publisher.Mono;
 public class JwtGlobalFilter implements GlobalFilter {
 
 	private final JwtTokenParser tokenParser;
+	private final StringRedisTemplate redisTemplate;
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -39,6 +41,13 @@ public class JwtGlobalFilter implements GlobalFilter {
 
 		try {
 			String token = authHeader.substring(7);
+
+			String isLogout = redisTemplate.opsForValue().get("blacklist:" + token);
+			if (isLogout != null) {
+				exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+				return exchange.getResponse().setComplete();
+			}
+
 			Claims claims = tokenParser.parseToken(token);
 
 			ServerHttpRequest request = exchange.getRequest()

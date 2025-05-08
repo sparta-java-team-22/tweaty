@@ -20,6 +20,7 @@ import com.tweaty.auth.application.dto.LoginResponseDto;
 import com.tweaty.auth.application.dto.OwnerResponseDto;
 import com.tweaty.auth.application.dto.OwnerSignUpRequestDto;
 import com.tweaty.auth.application.dto.PasswordUpdateRequestDto;
+import com.tweaty.auth.application.dto.TokenReissueRequestDto;
 import com.tweaty.auth.application.dto.UserResponseDto;
 import com.tweaty.auth.application.dto.UserSignUpRequestDto;
 import com.tweaty.auth.application.service.AuthService;
@@ -95,6 +96,32 @@ public class AuthController {
 		authService.updatePassword(username, requestDto);
 
 		return SuccessResponse.successMessageOnly("비밀번호 수정 성공");
+	}
+
+	// 토큰 재발급
+	@PostMapping("/reissue")
+	public ResponseEntity<ApiResponse<LoginResponseDto>> reissueToken(
+		@RequestHeader("Authorization") String authHeader,
+		@RequestBody TokenReissueRequestDto requestDto
+	) {
+
+		String refreshToken = requestDto.getRefreshToken();
+		LoginResponseDto responseDto = authService.reissueToken(authHeader, refreshToken);
+
+		return SuccessResponse.successWith(200, "토큰 재발급 성공", responseDto);
+
+	}
+
+	//로그아웃
+	@PostMapping("/logout")
+	public ResponseEntity<ApiResponse<Map<String, Object>>> logout(
+		@RequestHeader("Authorization") String authHeader
+	) {
+
+		authService.logout(authHeader);
+
+		return SuccessResponse.successMessageOnly("로그아웃 성공");
+
 	}
 
 }

@@ -1,12 +1,11 @@
-FROM eclipse-temurin:17-jdk
+# 베이스 이미지로 openjdk를 사용
+FROM openjdk:17-jdk-slim
 
-WORKDIR /store
+# 애플리케이션의 빌드를 위한 워킹 디렉토리 설정
+WORKDIR /app
 
-# 프로젝트 소스 복사
-COPY . .
+# 빌드된 JAR 파일을 Docker 이미지에 복사
+COPY build/libs/*.jar app.jar
 
-# Gradle 실행 권한 부여
-RUN chmod +x gradlew
-
-# JAR 빌드 없이 애플리케이션 실행 (bootRun 모드)
-CMD ["./gradlew", "bootRun"]
+# 애플리케이션을 실행하는 명령
+CMD ["java", "-jar", "app.jar"]

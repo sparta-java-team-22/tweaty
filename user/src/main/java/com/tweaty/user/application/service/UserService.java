@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +53,7 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final OwnerRepository ownerRepository;
 	private final NotificationServiceClient notificationServiceClient;
+	private final KafkaTemplate<String, Object> kafkaTemplate;
 
 	@Transactional
 	public UserResponseDto userSignUp(UserCreateRequestDto requestDto) {
@@ -230,7 +232,9 @@ public class UserService {
 				null
 			);
 
-			notificationServiceClient.createSignupNotification(requestDto);
+			kafkaTemplate.send("notification-topic", requestDto);
+
+			// notificationServiceClient.createSignupNotification(requestDto);
 
 			return new OwnerStatusChangeResponseDto(owner);
 
@@ -264,7 +268,9 @@ public class UserService {
 				reason
 			);
 
-			notificationServiceClient.createSignupNotification(requestDto);
+			kafkaTemplate.send("notification-topic", requestDto);
+
+			// notificationServiceClient.createSignupNotification(requestDto);
 
 			return new OwnerStatusChangeResponseDto(owner, reason);
 
@@ -290,7 +296,6 @@ public class UserService {
 	//중복 체크
 	private void checkDuplicateUser(UserCreateRequestDto requestDto) {
 
-		//오류처리
 		if (userRepository.existsByUsername(requestDto.getUsername())) {
 			throw new UsernameAlreadyExistsException();
 		}
