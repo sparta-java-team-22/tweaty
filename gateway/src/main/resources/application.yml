@@ -57,17 +57,55 @@ spring:
           predicates:
             - Path=/api/v1/payment/**
 
-        - id: coupon
+        - id: coupon-v1
           uri: lb://coupon-service
           predicates:
             - Path=/api/v1/coupons/**
 
-        - id: promotion
+        - id: coupon-v2
+          uri: lb://coupon-service
+          predicates:
+            - Path=/api/v2/coupons/**
+
+        - id: promotion-v1
           uri: lb://promotion-service
           predicates:
             - Path=/api/v1/promotions/**
+
+        - id: promotion-v2
+          uri: lb://promotion-service
+          predicates:
+            - Path=/api/v2/promotions/**
 
         - id: notification
           uri: lb://notification-service
           predicates:
             - Path=/api/v1/notifications/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus"
+        exclude: env, beans
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram.http.server.request: true
+  tracing:
+    sampling:
+      probability: 1.0
+    propagation:
+      consume: B3
+      produce: B3
+    baggage:
+      correlation:
+        enabled: true
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

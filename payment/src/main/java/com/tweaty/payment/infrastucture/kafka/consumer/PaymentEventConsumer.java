@@ -50,18 +50,17 @@ public class PaymentEventConsumer {
 		// 알림 전송, 로그 저장, 슬랙 메시지 발송 등 처리 가능
 	}
 
-	@KafkaListener(topics = "payment-create", groupId = "payment-service")
+	@KafkaListener(topics = "payment-create-test", groupId = "payment-service")
 	@Transactional
-	public void handleCreatePayment(PaymentCreateEvent event) {
+	public void handleCreatePaymentNature(PaymentCreateEvent event) {
 		log.info("결제 생성 이벤트 수신: {}", event);
 
-		Payment payment = paymentDomainService.findPayment(event.getPaymentId());
+		Payment payment = paymentDomainService.findPaymentNature(event.getPaymentId());
 
 		if (payment.isCompleted()) {
 			log.info("이미 처리된 결제입니다. paymentId: {}", payment.getId());
 			return;
 		}
-
 		try {
 			if (event.getCouponId() != null) {
 				CouponReadResponse coupon = couponClient.getCoupon(event.getCouponId());
@@ -70,7 +69,6 @@ public class PaymentEventConsumer {
 				);
 				payment.applyDiscount(coupon.discountAmount(), finalAmount);
 			}
-
 			if (payment.isCompleted()) {
 				log.warn("결제 처리 도중 상태 변경됨. 중복 처리 방지. paymentId: {}", payment.getId());
 				return;
@@ -91,19 +89,139 @@ public class PaymentEventConsumer {
 		}
 	}
 
+	@KafkaListener(topics = "payment-create", groupId = "payment-service")
+	@Transactional
+	public void handleCreatePayment(PaymentCreateEvent event) {
+		log.info("결제 생성 이벤트 수신: {}", event);
+
+		Payment payment = paymentDomainService.findPaymentWithLock(event.getPaymentId());
+
+		if (payment.isCompleted()) {
+			log.info("이미 처리된 결제입니다. paymentId: {}", payment.getId());
+			return;
+		}
+
+		try {
+			if (event.getCouponId() != null) {
+				CouponReadResponse coupon = couponClient.getCoupon(event.getCouponId());
+				int finalAmount = paymentDomainService.calculateDiscount(
+					event.getOriginalAmount(), coupon.discountAmount(), coupon.discountType()
+				);
+				payment.applyDiscount(coupon.discountAmount(), finalAmount);
+			}
+			if (payment.isCompleted()) {
+				log.warn("결제 처리 도중 상태 변경됨. 중복 처리 방지. paymentId: {}", payment.getId());
+				return;
+			}
+
+			payment.successPayment();
+			paymentRepository.save(payment);
+			log.info(" [Kafka 처리 완료] Payment 저장");
+
+			kafkaPaymentProducer.sendSuccessEvent(PaymentSuccessEvent.toDto(payment));
+
+		} catch (Exception e) {
+			log.error(" 결제 실패: {}", e.getMessage());
+			payment.failPayment();
+			paymentRepository.save(payment);
+
+			kafkaPaymentProducer.sendFailedEvent(PaymentFailedEvent.toDto(payment));
+		}
+	}
+
+	// @KafkaListener(topics = "payment-create-redisson", groupId = "payment-service")
+	// @Transactional
+	// public void handleCreatePaymentByRedisson(PaymentCreateEvent event) {
+	//
+	// 	log.info("결제 생성 이벤트 수신: {}", event);
+	//
+	// 	String lockKey = "payment-lock:" + event.getUserId() + ":" + event.getReservationId();
+	// 	RLock lock = redissonClient.getLock(lockKey);
+	// 	boolean isLocked = false;
+	//
+	// 	// 1. 락 밖에서 쿠폰 검증 및 할인 계산
+	// 	int discountAmount = 0;
+	// 	int finalAmount = event.getOriginalAmount();
+	//
+	// 	try {
+	// 		if (event.getCouponId() != null) {
+	// 			CouponReadResponse coupon = couponClient.getCoupon(event.getCouponId());
+	// 			discountAmount = coupon.discountAmount();
+	// 			finalAmount = paymentDomainService.calculateDiscount(
+	// 				event.getOriginalAmount(), coupon.discountAmount(), coupon.discountType()
+	// 			);
+	// 		}
+	// 	} catch (Exception e) {
+	// 		log.error("쿠폰 검증 실패: {}", e.getMessage());
+	// 		// 쿠폰 실패 시 결제 중단 or 무할인으로 진행 여부 결정
+	// 		return;
+	// 	}
+	//
+	// 	// 2. 락 획득 시도 + 시간 측정
+	// 	long start = System.currentTimeMillis();
+	// 	try {
+	// 		isLocked = lock.tryLock(2, 5, TimeUnit.SECONDS);
+	// 	} catch (InterruptedException e) {
+	// 		log.error("락 획득 중 인터럽트 발생", e);
+	// 		Thread.currentThread().interrupt();
+	// 		return;
+	// 	}
+	// 	long end = System.currentTimeMillis();
+	// 	log.info("락 획득: {}, 대기 시간: {}ms", isLocked, (end - start));
+	//
+	// 	if (!isLocked) {
+	// 		log.warn("락 획득 실패: 처리 중단. paymentId={}", event.getPaymentId());
+	// 		return;
+	// 	}
+	//
+	// 	try {
+	// 		// 3. 락 안에서 최소한의 작업: payment 상태 확인 + 처리
+	// 		Payment payment = paymentDomainService.findPayment(event.getPaymentId());
+	//
+	// 		if (payment.isCompleted()) {
+	// 			log.info("이미 완료된 결제입니다. paymentId: {}", payment.getId());
+	// 			return;
+	// 		}
+	//
+	// 		payment.applyDiscount(discountAmount, finalAmount);
+	// 		payment.successPayment();
+	// 		paymentRepository.save(payment);
+	// 		log.info("[Kafka 처리 완료] Payment 저장");
+	//
+	// 		kafkaPaymentProducer.sendSuccessEvent(PaymentSuccessEvent.toDto(payment));
+	//
+	// 	} catch (Exception e) {
+	// 		log.error("결제 처리 중 예외 발생: {}", e.getMessage());
+	//
+	// 		try {
+	// 			Payment payment = paymentDomainService.findPayment(event.getPaymentId());
+	// 			if (!payment.isCompleted()) {
+	// 				payment.failPayment();
+	// 				paymentRepository.save(payment);
+	// 				kafkaPaymentProducer.sendFailedEvent(PaymentFailedEvent.toDto(payment));
+	// 			}
+	// 		} catch (Exception ex) {
+	// 			log.error("결제 실패 상태 저장 중 오류: {}", ex.getMessage());
+	// 		}
+	// 	} finally {
+	// 		if (lock.isHeldByCurrentThread()) {
+	// 			lock.unlock();
+	// 		}
+	// 	}
+	// }
+
 	@KafkaListener(topics = "payment-create-redisson", groupId = "payment-service")
 	@Transactional
 	public void handleCreatePaymentByRedisson(PaymentCreateEvent event) {
 
-		log.info("결제 생성 이벤트 수신: {}", event);
+		log.debug("결제 생성 이벤트 수신: {}", event);
 
 		String lockKey = "payment-lock:" + event.getUserId() + ":" + event.getReservationId();
 		RLock lock = redissonClient.getLock(lockKey);
-
 		boolean isLocked = false;
 		try {
-			// 2초 동안 락 획득 시도, 10초 동안 점유
-			isLocked = lock.tryLock(2, 10, TimeUnit.SECONDS);
+			// 2초 동안 락 획득 시도, 5초 동안 점유
+			isLocked = lock.tryLock(2, 5, TimeUnit.SECONDS);
 
 			if (!isLocked) {
 				log.warn("락 획득 실패: 결제 처리 중단. paymentId={}", event.getPaymentId());
@@ -113,7 +231,7 @@ public class PaymentEventConsumer {
 			Payment payment = paymentDomainService.findPayment(event.getPaymentId());
 
 			if (payment.isCompleted()) {
-				log.info("이미 완료된 결제입니다. paymentId: {}", payment.getId());
+				log.debug("이미 완료된 결제입니다. paymentId: {}", payment.getId());
 				return;
 			}
 
@@ -126,14 +244,9 @@ public class PaymentEventConsumer {
 					payment.applyDiscount(coupon.discountAmount(), finalAmount);
 				}
 
-				if (payment.isCompleted()) {
-					log.warn("처리 중 상태 변경됨. 중복 방지. paymentId={}", payment.getId());
-					return;
-				}
-
 				payment.successPayment();
 				paymentRepository.save(payment);
-				log.info("[Kafka 처리 완료] Payment 저장");
+				log.debug("[Kafka 처리 완료] Payment 저장");
 
 				kafkaPaymentProducer.sendSuccessEvent(PaymentSuccessEvent.toDto(payment));
 
@@ -151,10 +264,6 @@ public class PaymentEventConsumer {
 		} catch (InterruptedException e) {
 			log.error("락 처리 중 인터럽트 발생", e);
 			Thread.currentThread().interrupt();
-		} finally {
-			// if (isLocked && lock.isHeldByCurrentThread()) {
-			// 	lock.unlock();
-			// }
 		}
 	}
 

@@ -26,11 +26,16 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID> {
 	SELECT p FROM Payment p
 	WHERE p.userId = :userId 
 	  AND p.reservationId = :reservationId 
-	  AND p.status <> :status
 	ORDER BY p.createdAt DESC
 """)
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
-	List<Payment> findExistingList(@Param("userId") UUID userId, @Param("reservationId") UUID reservationId, @Param("status") PaymentType status);
+	Optional<Payment> findExistingForUpdate(@Param("userId") UUID userId, @Param("reservationId") UUID reservationId);
 
 	Boolean existsByUserIdAndReservationId(UUID userId, UUID reservationId);
+
+
+
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	@Query("SELECT p FROM Payment p WHERE p.id = :paymentId")
+	Optional<Payment> findByIdForUpdate(@Param("paymentId") UUID paymentId);
 }
