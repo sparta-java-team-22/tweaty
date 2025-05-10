@@ -7,7 +7,7 @@
 > 🍽️ 원하는 식당을 검색하고 실시간으로 예약 가능 여부를 확인한 뒤 손쉽게 예약할 수 있는 식당 예약 서비스입니다.
 
 <p align="center">
-<img src="https://github.com/user-attachments/assets/59050f5d-8742-4b33-a169-b0859fa9471c" width="450" height="450"/> 
+<img src="https://github.com/user-attachments/assets/59050f5d-8742-4b33-a169-b0859fa9471c" width="250" height="250"/> 
 </p>
 
 ---
@@ -26,7 +26,7 @@
 
 <br>
 
-### 👤 팀원소개
+### 👤 3. 팀원소개
 
 |      김은수      |          박동휘          |          손세라          |      이승욱       |
 |:-------------:|:---------------------:|:---------------------:|:--------------:|
@@ -34,7 +34,7 @@
 
 ---
 
-### 시스템 특징
+### 4. 시스템 특징
 
 **🏪 가게 관리 시스템**
 > 
@@ -79,13 +79,13 @@
 <br>
 
 
-## 🗃️ ERD
+## 🗃️ 5. ERD
 
 > PostgreSQL 기반 ERD
 
 <img width="700" alt="image" src="https://github.com/user-attachments/assets/cccf11bb-60e6-4d61-b950-d88de0438b1a" />
 
-## 🛠 기술 스택
+## 🛠 6. 기술 스택
 
 <div style="display: flex; justify-content: center;">
   <img src="https://img.shields.io/badge/Java-007396?&style=flat&logo=java&logoColor=white" style="margin-right: 10px;"> <br>
