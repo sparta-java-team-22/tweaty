@@ -36,6 +36,12 @@ spring:
           predicates:
             - Path=/api/v1/stores/**
 
+        - id: menu
+          uri: lb://store-service
+          predicates:
+            - Path=/api/v1/menu/**
+
+
         - id: reservation
           uri: lb://reservation-service
           predicates:
@@ -49,7 +55,7 @@ spring:
         - id: payment
           uri: lb://payment-service
           predicates:
-            - Path=/api/v1/payments/**
+            - Path=/api/v1/payment/**
 
         - id: coupon-v1
           uri: lb://coupon-service

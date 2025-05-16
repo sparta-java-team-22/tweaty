@@ -43,6 +43,7 @@ dependencies {
 	runtimeOnly 'com.h2database:h2'
 	implementation 'org.springframework.kafka:spring-kafka'
 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+	implementation 'org.redisson:redisson-spring-boot-starter:3.27.0'
 	implementation project(":common")
 }
 
